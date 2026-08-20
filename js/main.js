@@ -33,7 +33,7 @@ const consent = {
       '<p>This is a research study about how people notice patterns. ' +
          'You will watch items being drawn out of ' + CONFIG.BAG_WORD +
          's and guess what comes next.</p>' +
-      '<p>The study will take about N'// + CONFIG.ESTIMATED_MINUTES +
+      '<p>The study will take about N' + // + CONFIG.ESTIMATED_MINUTES +
          ' minutes, and you can stop at any time by closing the window. ' +
          'Data is stored anonymously.</p>' +
     '</div>',
