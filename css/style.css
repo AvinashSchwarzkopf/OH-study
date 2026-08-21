@@ -21,21 +21,23 @@ p{margin:0 0 14px}
 .prompt{font-size:20px; font-weight:600; margin-top:26px}
 
 /* --- the bags, stacked oldest first --- */
-/* One grid for every row, so the "Bag n" labels line up down the page. */
-.bags{display:grid; grid-template-columns:78px auto; gap:10px 14px;
-  justify-content:center; align-items:center; margin:6px 0 4px; text-align:left}
-.bagrow{display:contents}
-.rowlab{display:flex; align-items:center; gap:7px; justify-content:flex-end;
-  color:var(--muted); font-size:13px; letter-spacing:.03em; white-space:nowrap}
+/* Column of rows; a fixed-width label keeps "Bag n" lined up down the
+   page, and every row is the same width so the finished cards align. */
+.bags{display:inline-flex; flex-direction:column; align-items:stretch;
+  gap:10px; margin:6px 0 4px; text-align:left}
+.bagrow{display:flex; align-items:center; gap:14px; padding:7px 14px 7px 10px;
+  border:1px solid transparent; border-radius:13px}
+.rowlab{flex:0 0 60px; display:flex; align-items:center; gap:7px;
+  justify-content:flex-end; color:var(--muted); font-size:13px;
+  letter-spacing:.03em; white-space:nowrap}
 .bagrow.current .rowlab{color:var(--ink); font-weight:600}
-.bagicon{width:17px; height:19px; flex:0 0 auto; border-radius:3px 3px 9px 9px;
-  background:linear-gradient(#c9b79a,#b09b7b); border:1px solid #8d7a5c;
-  box-shadow:inset 0 3px 5px rgba(0,0,0,.14)}
-.bagrow.done .rowlab, .bagrow.done .tiles{opacity:.72}
+/* A finished bag becomes its own card. */
+.bagrow.done{background:var(--card); border-color:var(--line);
+  box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.bagrow.done .rowlab, .bagrow.done .tiles{opacity:.75}
 .tiles{display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-height:44px}
+.bagrow.done .tiles{min-height:32px}
 .tiles.demo{justify-content:flex-start; margin:16px 0 20px}
-.next{display:inline-flex; align-items:center; gap:6px}
-.arrow{color:var(--muted); font-size:20px}
 
 .tile{width:42px; height:42px; flex:0 0 auto; border-radius:9px; color:#fff;
   display:inline-flex; align-items:center; justify-content:center;
@@ -44,15 +46,22 @@ p{margin:0 0 14px}
 .bagrow.done .tile{width:30px; height:30px; font-size:15px; border-radius:7px}
 .tile-A{background:var(--A)} .tile-B{background:var(--B)}
 .tile-C{background:var(--C)} .tile-D{background:var(--D)}
-.tile-unknown{background:transparent; color:var(--muted);
-  border:2px dashed #b9b5ac; box-shadow:none}
+/* still in the bag: face down, letter hidden */
+.tile-slot{background:#e9e6df; border:1px solid #d9d5cc; color:#b4afa5;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.07)}
+.tile-slot.tile-next{background:#f3f0e9; border:2px solid #8d887e;
+  color:var(--muted)}
 .tile-new{animation:pop .28s ease-out; outline:3px solid #26241f; outline-offset:2px}
 @keyframes pop{from{transform:scale(.4); opacity:0} to{transform:scale(1); opacity:1}}
 @media (prefers-reduced-motion:reduce){ .tile-new{animation:none} }
 
 .caption{margin-top:20px; min-height:28px}
-.fb{font-size:17px; font-weight:600; padding:5px 14px; border-radius:20px}
-.fb.ok{background:#e2efdb; color:#39662a} .fb.no{background:#f3e2dc; color:#8f3d22}
+/* marks the warm-up block, so practice is never mistaken for the study */
+.tag{display:inline-block; margin-bottom:10px; padding:2px 11px; border-radius:20px;
+  background:#e8e4db; color:var(--muted); font-size:11px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase}
+.chose{font-size:16px; color:var(--muted)}
+.chose b{color:var(--ink); font-weight:600}
 
 /* --- buttons --- */
 #jspsych-html-button-response-btngroup{display:flex; gap:12px;
@@ -80,8 +89,9 @@ textarea,input,select{font-family:inherit; font-size:16px; padding:8px;
 
 @media (max-width:640px){
   #jspsych-target{padding:24px 14px 60px}
-  .bags{grid-template-columns:52px auto; gap:8px 10px}
-  .rowlab{font-size:12px}
+  .bags{gap:8px}
+  .bagrow{gap:9px; padding:6px 9px}
+  .rowlab{flex-basis:46px; font-size:12px}
   .tile-btn{width:60px; height:60px; font-size:26px}
   .prompt{font-size:18px}
   h1{font-size:24px} h2{font-size:20px}

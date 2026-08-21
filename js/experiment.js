@@ -26,6 +26,11 @@ const COMPLETION_CODE =
 /* ---------- Pattern assignment ------------------------------------ */
 function eligiblePatterns() {
   let ps = PATTERNS.slice();
+  // The practice pattern is spent on practice; seeing it twice would
+  // make its second run an odd hybrid of practice and data.
+  if (CONFIG.PRACTICE_PATTERN) {
+    ps = ps.filter(p => p.id !== CONFIG.PRACTICE_PATTERN);
+  }
   if (CONFIG.EXCLUDE_INVALID_PATTERNS) {
     const dropped = ps.filter(p => !p.valid).map(p => p.name);
     if (dropped.length) {
@@ -48,8 +53,10 @@ function assignPatterns() {
     if (hit.length) return hit;
     console.warn('No pattern with id "' + FORCE_PATTERN + '"; assigning at random.');
   }
-  return jsPsych.randomization.sampleWithoutReplacement(
-    pool, Math.min(CONFIG.PATTERNS_PER_PARTICIPANT, pool.length));
+  const n = CONFIG.PATTERNS_PER_PARTICIPANT === "all"
+    ? pool.length
+    : Math.min(CONFIG.PATTERNS_PER_PARTICIPANT, pool.length);
+  return jsPsych.randomization.sampleWithoutReplacement(pool, n);
 }
 
 /* Random A/B/C/D relabelling (optional counterbalancing). */
@@ -73,42 +80,53 @@ function escapeHtml(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
+/* "sequence" -> "Sequence", for row labels and headings. */
+function capWord(w) { return w.charAt(0).toUpperCase() + w.slice(1); }
+
 function tile(letter, extraClass) {
   return '<span class="tile tile-' + letter + ' ' + (extraClass || '') + '">' +
          letter + '</span>';
+}
+
+/* One face-down slot for an item still in the bag. The slot that is
+   about to be drawn is marked, so the participant can see how much is
+   left and exactly which position their guess is about. */
+function slot(isNext) {
+  return '<span class="tile tile-slot' + (isNext ? ' tile-next' : '') + '">' +
+         (isNext ? '?' : '') + '</span>';
 }
 
 function bagRow(index, items, opts) {
   opts = opts || {};
   const tiles = items.map((l, i) =>
     tile(l, opts.newAt === i ? "tile-new" : "")).join("");
-  let tail = "";
-  if (opts.awaiting) {
-    tail = items.length
-      ? '<span class="next"><span class="arrow">→</span>' +
-        '<span class="tile tile-unknown">?</span></span>'
-      : '<span class="tile tile-unknown">?</span>';
+  let slots = "";
+  for (let i = 0; i < (opts.remaining || 0); i++) {
+    slots += slot(i === 0 && opts.awaiting);
   }
   return '<div class="bagrow' + (opts.current ? ' current' : ' done') + '">' +
            '<div class="rowlab">' +
-             (opts.current ? '<span class="bagicon"></span>' : '') +
-             '<span>Bag ' + index + '</span>' +
+             '<span>' + capWord(CONFIG.SEQ_WORD) + ' ' + index + '</span>' +
            '</div>' +
-           '<div class="tiles">' + tiles + tail + '</div>' +
+           '<div class="tiles">' + tiles + slots + '</div>' +
          '</div>';
 }
 
 /* history: [[letters of bag 1], ...] for bags already emptied.
-   current: {index, items, awaiting, newAt} for the bag in play. */
+   current: {index, items, remaining, awaiting, newAt} for the bag in play. */
 function scene(history, current, caption) {
   const rows = history.map((items, i) => bagRow(i + 1, items, {}));
   if (current) {
     rows.push(bagRow(current.index, current.items, {
-      current: true, awaiting: current.awaiting, newAt: current.newAt
+      current: true, remaining: current.remaining,
+      awaiting: current.awaiting, newAt: current.newAt
     }));
   }
+  /* The caption slot is kept even when empty, so the prompt below it
+     does not jump between the first draw of a bag and the rest. */
   return '<div class="scene"><div class="bags">' + rows.join("") + '</div>' +
-         (caption ? '<div class="caption">' + caption + '</div>' : '') + '</div>';
+         (caption == null ? '' : '<div class="caption">' + caption + '</div>') +
+         '</div>';
 }
 
 /* Let A/B/C/D keys stand in for button clicks. */
@@ -126,7 +144,7 @@ function attachKeyboard(choices) {
 
 /* A "press on" screen: a real button, plus the spacebar as a shortcut.
    (A keyboard-only screen strands anyone whose focus is elsewhere.) */
-function continueTrial(stimulus, data, label) {
+function continueTrial(stimulus, data, label, after) {
   let keyHandler = null;
   return {
     type: jsPsychHtmlButtonResponse,
@@ -142,19 +160,36 @@ function continueTrial(stimulus, data, label) {
       };
       document.addEventListener("keydown", keyHandler);
     },
-    on_finish: () => document.removeEventListener("keydown", keyHandler),
+    on_finish: () => {
+      document.removeEventListener("keydown", keyHandler);
+      if (after) after();
+    },
     data: data
   };
 }
 
 /* ---------- Build the trial timeline for one pattern -------------- */
-function patternTimeline(pattern, patternIndex, nPatterns) {
+/* opts: {practice: true, nBags: n} for the warm-up block. */
+function patternTimeline(pattern, patternIndex, nPatterns, opts) {
+  opts = opts || {};
   const map = makeLetterMap(pattern);
-  const bags = pattern.bags.map(b => b.split("").map(c => map[c]));
-  const choices = [...new Set(bags.flat().concat(["A", "B", "C", "D"]))].sort();
+  const source = opts.nBags ? pattern.bags.slice(0, opts.nBags) : pattern.bags;
+  const bags = source.map(b => b.split("").map(c => map[c]));
+  const tag = opts.practice ? '<div class="tag">practice</div>' : '';
+  const choices = [...new Set(pattern.bags.join("").split("").map(c => map[c])
+                              .concat(["A", "B", "C", "D"]))].sort();
 
   const timeline = [];
   const history = [];   // bags already emptied, in order
+
+  /* The draw and the next prediction share one screen, so nothing is
+     timed: the item that just came out is on screen, labelled with what
+     the participant guessed, while the next guess is being made. */
+  let lastChoice = null;
+  const echo = () =>
+    (CONFIG.SHOW_CHOICE_ECHO && lastChoice)
+      ? '<span class="chose">You chose <b>' + escapeHtml(lastChoice) + '</b></span>'
+      : '';
 
   bags.forEach((bag, bagIndex) => {
     const drawn = [];
@@ -168,9 +203,13 @@ function patternTimeline(pattern, patternIndex, nPatterns) {
         let keyHandler = null;
         timeline.push({
           type: jsPsychHtmlButtonResponse,
-          stimulus:
-            '<div class="screen">' +
-              scene(past, { index: bagIndex + 1, items: snapshot, awaiting: true }) +
+          stimulus: () =>
+            '<div class="screen">' + tag +
+              scene(past, { index: bagIndex + 1, items: snapshot,
+                           remaining: bag.length - snapshot.length,
+                           awaiting: true,
+                           newAt: drawIndex > 0 ? snapshot.length - 1 : -1 },
+                    echo()) +
               '<p class="prompt">Which letter will come out next?</p>' +
             '</div>',
           choices: choices,
@@ -182,9 +221,11 @@ function patternTimeline(pattern, patternIndex, nPatterns) {
             if (keyHandler) document.removeEventListener("keydown", keyHandler);
             data.predicted = choices[data.response];
             data.correct = data.predicted === actual;
+            lastChoice = data.predicted;
           },
           data: {
             screen: "prediction",
+            is_practice: !!opts.practice,
             group: pattern.group,
             pattern_id: pattern.id,
             pattern_name: pattern.name,
@@ -205,43 +246,19 @@ function patternTimeline(pattern, patternIndex, nPatterns) {
       }
 
       drawn.push(actual);
-      const afterDraw = drawn.slice();
-
-      timeline.push({
-        type: jsPsychHtmlKeyboardResponse,
-        choices: "NO_KEYS",
-        trial_duration: CONFIG.REVEAL_DURATION_MS,
-        stimulus: () => {
-          const last = jsPsych.data.get().filter({ screen: "prediction" }).last(1).values()[0];
-          let caption = "";
-          if (CONFIG.SHOW_ACCURACY_FEEDBACK && last && last.pattern_id === pattern.id &&
-              last.bag_index === bagIndex + 1 && last.draw_index === drawIndex + 1) {
-            caption = last.correct
-              ? '<span class="fb ok">Correct</span>'
-              : '<span class="fb no">Not this time — you said ' +
-                escapeHtml(last.predicted) + '</span>';
-          }
-          return '<div class="screen">' +
-                   scene(past, { index: bagIndex + 1, items: afterDraw,
-                                 newAt: afterDraw.length - 1 }, caption) +
-                 '</div>';
-        },
-        data: {
-          screen: "reveal", pattern_id: pattern.id,
-          bag_index: bagIndex + 1, draw_index: drawIndex + 1, actual: actual
-        }
-      });
     });
 
     history.push(drawn.slice());
     const emptied = history.slice();
 
     timeline.push(continueTrial(
-      '<div class="screen">' + scene(emptied, null) + '</div>',
-      { screen: "bag_end", pattern_id: pattern.id, bag_index: bagIndex + 1 },
+      () => '<div class="screen">' + tag + scene(emptied, null, echo()) + '</div>',
+      { screen: "bag_end", pattern_id: pattern.id, bag_index: bagIndex + 1,
+        is_practice: !!opts.practice },
       bagIndex < bags.length - 1
-        ? "Start " + CONFIG.BAG_WORD + " " + (bagIndex + 2)
-        : "Continue"));
+        ? "Start " + CONFIG.SEQ_WORD + " " + (bagIndex + 2)
+        : "Continue",
+      () => { lastChoice = null; }));   // a new bag starts with a clean caption
   });
 
   return { timeline: timeline, letter_map: map };

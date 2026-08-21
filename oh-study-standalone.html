@@ -329,21 +329,23 @@ p{margin:0 0 14px}
 .prompt{font-size:20px; font-weight:600; margin-top:26px}
 
 /* --- the bags, stacked oldest first --- */
-/* One grid for every row, so the "Bag n" labels line up down the page. */
-.bags{display:grid; grid-template-columns:78px auto; gap:10px 14px;
-  justify-content:center; align-items:center; margin:6px 0 4px; text-align:left}
-.bagrow{display:contents}
-.rowlab{display:flex; align-items:center; gap:7px; justify-content:flex-end;
-  color:var(--muted); font-size:13px; letter-spacing:.03em; white-space:nowrap}
+/* Column of rows; a fixed-width label keeps "Bag n" lined up down the
+   page, and every row is the same width so the finished cards align. */
+.bags{display:inline-flex; flex-direction:column; align-items:stretch;
+  gap:10px; margin:6px 0 4px; text-align:left}
+.bagrow{display:flex; align-items:center; gap:14px; padding:7px 14px 7px 10px;
+  border:1px solid transparent; border-radius:13px}
+.rowlab{flex:0 0 60px; display:flex; align-items:center; gap:7px;
+  justify-content:flex-end; color:var(--muted); font-size:13px;
+  letter-spacing:.03em; white-space:nowrap}
 .bagrow.current .rowlab{color:var(--ink); font-weight:600}
-.bagicon{width:17px; height:19px; flex:0 0 auto; border-radius:3px 3px 9px 9px;
-  background:linear-gradient(#c9b79a,#b09b7b); border:1px solid #8d7a5c;
-  box-shadow:inset 0 3px 5px rgba(0,0,0,.14)}
-.bagrow.done .rowlab, .bagrow.done .tiles{opacity:.72}
+/* A finished bag becomes its own card. */
+.bagrow.done{background:var(--card); border-color:var(--line);
+  box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.bagrow.done .rowlab, .bagrow.done .tiles{opacity:.75}
 .tiles{display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-height:44px}
+.bagrow.done .tiles{min-height:32px}
 .tiles.demo{justify-content:flex-start; margin:16px 0 20px}
-.next{display:inline-flex; align-items:center; gap:6px}
-.arrow{color:var(--muted); font-size:20px}
 
 .tile{width:42px; height:42px; flex:0 0 auto; border-radius:9px; color:#fff;
   display:inline-flex; align-items:center; justify-content:center;
@@ -352,15 +354,22 @@ p{margin:0 0 14px}
 .bagrow.done .tile{width:30px; height:30px; font-size:15px; border-radius:7px}
 .tile-A{background:var(--A)} .tile-B{background:var(--B)}
 .tile-C{background:var(--C)} .tile-D{background:var(--D)}
-.tile-unknown{background:transparent; color:var(--muted);
-  border:2px dashed #b9b5ac; box-shadow:none}
+/* still in the bag: face down, letter hidden */
+.tile-slot{background:#e9e6df; border:1px solid #d9d5cc; color:#b4afa5;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.07)}
+.tile-slot.tile-next{background:#f3f0e9; border:2px solid #8d887e;
+  color:var(--muted)}
 .tile-new{animation:pop .28s ease-out; outline:3px solid #26241f; outline-offset:2px}
 @keyframes pop{from{transform:scale(.4); opacity:0} to{transform:scale(1); opacity:1}}
 @media (prefers-reduced-motion:reduce){ .tile-new{animation:none} }
 
 .caption{margin-top:20px; min-height:28px}
-.fb{font-size:17px; font-weight:600; padding:5px 14px; border-radius:20px}
-.fb.ok{background:#e2efdb; color:#39662a} .fb.no{background:#f3e2dc; color:#8f3d22}
+/* marks the warm-up block, so practice is never mistaken for the study */
+.tag{display:inline-block; margin-bottom:10px; padding:2px 11px; border-radius:20px;
+  background:#e8e4db; color:var(--muted); font-size:11px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase}
+.chose{font-size:16px; color:var(--muted)}
+.chose b{color:var(--ink); font-weight:600}
 
 /* --- buttons --- */
 #jspsych-html-button-response-btngroup{display:flex; gap:12px;
@@ -388,8 +397,9 @@ textarea,input,select{font-family:inherit; font-size:16px; padding:8px;
 
 @media (max-width:640px){
   #jspsych-target{padding:24px 14px 60px}
-  .bags{grid-template-columns:52px auto; gap:8px 10px}
-  .rowlab{font-size:12px}
+  .bags{gap:8px}
+  .bagrow{gap:9px; padding:6px 9px}
+  .rowlab{flex-basis:46px; font-size:12px}
   .tile-btn{width:60px; height:60px; font-size:26px}
   .prompt{font-size:18px}
   h1{font-size:24px} h2{font-size:20px}
@@ -453,11 +463,6 @@ var jsPsychHtmlButtonResponse=function(s){"use strict";var y="2.1.0";const b={na
 <script>
 var jsPsychHtmlKeyboardResponse=function(i){"use strict";var u="2.1.0";const p={name:"html-keyboard-response",version:u,parameters:{stimulus:{type:i.ParameterType.HTML_STRING,default:void 0},choices:{type:i.ParameterType.KEYS,default:"ALL_KEYS"},prompt:{type:i.ParameterType.HTML_STRING,default:null},stimulus_duration:{type:i.ParameterType.INT,default:null},trial_duration:{type:i.ParameterType.INT,default:null},response_ends_trial:{type:i.ParameterType.BOOL,default:!0}},data:{response:{type:i.ParameterType.STRING},rt:{type:i.ParameterType.INT},stimulus:{type:i.ParameterType.STRING}},citations:{apa:"de Leeuw, J. R., Gilbert, R. A., & Luchterhandt, B. (2023). jsPsych: Enabling an Open-Source Collaborative Ecosystem of Behavioral Experiments. Journal of Open Source Software, 8(85), 5351. https://doi.org/10.21105/joss.05351 ",bibtex:'@article{Leeuw2023jsPsych, 	author = {de Leeuw, Joshua R. and Gilbert, Rebecca A. and Luchterhandt, Bj{\\" o}rn}, 	journal = {Journal of Open Source Software}, 	doi = {10.21105/joss.05351}, 	issn = {2475-9066}, 	number = {85}, 	year = {2023}, 	month = {may 11}, 	pages = {5351}, 	publisher = {Open Journals}, 	title = {jsPsych: Enabling an {Open}-{Source} {Collaborative} {Ecosystem} of {Behavioral} {Experiments}}, 	url = {https://joss.theoj.org/papers/10.21105/joss.05351}, 	volume = {8}, }  '}};class n{constructor(t){this.jsPsych=t}trial(t,e){var a='<div id="jspsych-html-keyboard-response-stimulus">'+e.stimulus+"</div>";e.prompt!==null&&(a+=e.prompt),t.innerHTML=a;var s={rt:null,key:null};const r=()=>{typeof o!="undefined"&&this.jsPsych.pluginAPI.cancelKeyboardResponse(o);var l={rt:s.rt,stimulus:e.stimulus,response:s.key};this.jsPsych.finishTrial(l)};var m=l=>{t.querySelector("#jspsych-html-keyboard-response-stimulus").className+=" responded",s.key==null&&(s=l),e.response_ends_trial&&r()};if(e.choices!="NO_KEYS")var o=this.jsPsych.pluginAPI.getKeyboardResponse({callback_function:m,valid_responses:e.choices,rt_method:"performance",persist:!1,allow_held_key:!1});e.stimulus_duration!==null&&this.jsPsych.pluginAPI.setTimeout(()=>{t.querySelector("#jspsych-html-keyboard-response-stimulus").style.visibility="hidden"},e.stimulus_duration),e.trial_duration!==null&&this.jsPsych.pluginAPI.setTimeout(r,e.trial_duration)}simulate(t,e,a,s){e=="data-only"&&(s(),this.simulate_data_only(t,a)),e=="visual"&&this.simulate_visual(t,a,s)}create_simulation_data(t,e){const a={stimulus:t.stimulus,rt:this.jsPsych.randomization.sampleExGaussian(500,50,.006666666666666667,!0),response:this.jsPsych.pluginAPI.getValidKey(t.choices)},s=this.jsPsych.pluginAPI.mergeSimulationData(a,e);return this.jsPsych.pluginAPI.ensureSimulationDataConsistency(t,s),s}simulate_data_only(t,e){const a=this.create_simulation_data(t,e);this.jsPsych.finishTrial(a)}simulate_visual(t,e,a){const s=this.create_simulation_data(t,e),r=this.jsPsych.getDisplayElement();this.trial(r,t),a(),s.rt!==null&&this.jsPsych.pluginAPI.pressKey(s.response,s.rt)}}return n.info=p,n}(jsPsychModule);
 //# sourceMappingURL=https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0/dist/index.browser.min.js.map
-
-</script>
-<script>
-var jsPsychSurveyHtmlForm=function(a){"use strict";var p="2.1.0";const c={name:"survey-html-form",version:p,parameters:{html:{type:a.ParameterType.HTML_STRING,default:null},preamble:{type:a.ParameterType.HTML_STRING,default:null},button_label:{type:a.ParameterType.STRING,default:"Continue"},autofocus:{type:a.ParameterType.STRING,default:""},dataAsArray:{type:a.ParameterType.BOOL,default:!1},autocomplete:{type:a.ParameterType.BOOL,default:!1}},data:{response:{type:a.ParameterType.OBJECT},rt:{type:a.ParameterType.INT}},citations:{apa:"de Leeuw, J. R., Gilbert, R. A., & Luchterhandt, B. (2023). jsPsych: Enabling an Open-Source Collaborative Ecosystem of Behavioral Experiments. Journal of Open Source Software, 8(85), 5351. https://doi.org/10.21105/joss.05351 ",bibtex:'@article{Leeuw2023jsPsych, 	author = {de Leeuw, Joshua R. and Gilbert, Rebecca A. and Luchterhandt, Bj{\\" o}rn}, 	journal = {Journal of Open Source Software}, 	doi = {10.21105/joss.05351}, 	issn = {2475-9066}, 	number = {85}, 	year = {2023}, 	month = {may 11}, 	pages = {5351}, 	publisher = {Open Journals}, 	title = {jsPsych: Enabling an {Open}-{Source} {Collaborative} {Ecosystem} of {Behavioral} {Experiments}}, 	url = {https://joss.theoj.org/papers/10.21105/joss.05351}, 	volume = {8}, }  '}};class i{constructor(l){this.jsPsych=l}trial(l,t){var u="";if(t.preamble!==null&&(u+='<div id="jspsych-survey-html-form-preamble" class="jspsych-survey-html-form-preamble">'+t.preamble+"</div>"),t.autocomplete?u+='<form id="jspsych-survey-html-form">':u+='<form id="jspsych-survey-html-form" autocomplete="off">',u+=t.html,u+='<input type="submit" id="jspsych-survey-html-form-next" class="jspsych-btn jspsych-survey-html-form" value="'+t.button_label+'"></input>',u+="</form>",l.innerHTML=u,t.autofocus!==""){var m=l.querySelectorAll("#"+t.autofocus);m.length===0?console.warn("No element found with id: "+t.autofocus):m.length>1?console.warn('The id "'+t.autofocus+'" is not unique so autofocus will not work.'):m[0].focus()}l.querySelector("#jspsych-survey-html-form").addEventListener("submit",o=>{o.preventDefault();var s=performance.now(),r=Math.round(s-y),e=l.querySelector("#jspsych-survey-html-form"),n=f(e);t.dataAsArray||(n=h(n));var v={rt:r,response:n};this.jsPsych.finishTrial(v)});var y=performance.now();function f(o){for(var s=[],r=0;r<o.elements.length;r++){var e=o.elements[r];if(!(!e.name||e.disabled||e.type==="file"||e.type==="reset"||e.type==="submit"||e.type==="button"))if(e.type==="select-multiple")for(var n=0;n<e.options.length;n++)e.options[n].selected&&s.push({name:e.name,value:e.options[n].value});else(e.type!=="checkbox"&&e.type!=="radio"||e.checked)&&s.push({name:e.name,value:e.value})}return s}function h(o){for(var s={},r=0;r<o.length;r++)s[o[r].name]=o[r].value;return s}}}return i.info=c,i}(jsPsychModule);
-//# sourceMappingURL=https://unpkg.com/@jspsych/plugin-survey-html-form@2.1.0/dist/index.browser.min.js.map
 
 </script>
 <script>
@@ -843,10 +848,12 @@ const PATTERNS = [
 const CONFIG = {
 
   // ---- Design ----------------------------------------------------
-  // How many patterns (= CSV rows) each participant sees.
-  // 1 = fully between-subjects. Raising this risks carry-over: having
-  // just learned "Alternating" changes how a person approaches "Grow".
-  PATTERNS_PER_PARTICIPANT: 1,
+  // How many patterns (= CSV rows) each participant sees, in a random
+  // order. "all" runs every eligible pattern in one session; a number
+  // runs that many. Note the carry-over: having just learned
+  // "Alternating" changes how a person approaches "Grow", and with
+  // "all" that applies to every pattern after the first.
+  PATTERNS_PER_PARTICIPANT: "all",
 
   // Patterns whose bags contain characters outside A-D are held out of
   // random assignment (currently: "Bracketing", bag 4 = DANCDNCD).
@@ -862,15 +869,28 @@ const CONFIG = {
   // The mapping is stored in the data. Off = shown exactly as in the CSV.
   COUNTERBALANCE_LETTERS: false,
 
+  // ---- Practice --------------------------------------------------
+  // A warm-up before the study proper. Identity (AAAAA / BBBBB / ...)
+  // is the easiest pattern, so it teaches the mechanics without
+  // teaching a rule worth transferring. The practice pattern is
+  // dropped from the main assignment so nobody sees it twice, and its
+  // rows are flagged is_practice. Set to "" for no practice.
+  PRACTICE_PATTERN: "identity",
+  PRACTICE_SEQUENCES: 4,     // how many of its four sequences to run
+
   // ---- Trial flow ------------------------------------------------
   ASK_ON_FIRST_DRAW: true,   // predict draw 1 of a bag (a pure guess; useful baseline)
-  SHOW_ACCURACY_FEEDBACK: true, // mark the reveal "Correct"/"Not this time"
-  REVEAL_DURATION_MS: 1400,  // how long the drawn item stays before the next prediction
-  ALLOW_KEYBOARD: true,      // A/B/C/D keys as well as clicks
+  SHOW_CHOICE_ECHO: true,    // echo "You chose X" under the bags after each draw
+  // false = the letter buttons must be clicked; the A/B/C/D keys do
+  // nothing. (The spacebar shortcut on Next/Begin/Continue screens is
+  // separate and always on.)
+  ALLOW_KEYBOARD: false,
 
   // ---- Participant-facing copy ----------------------------------
-  BAG_WORD: "bag",
-  ESTIMATED_MINUTES: 8,
+  // The participant-facing word for one run of items (was "bag").
+  // Row labels, buttons and screen copy all follow it.
+  SEQ_WORD: "sequence",
+  ESTIMATED_MINUTES: 30,     // 22 patterns x ~33 draws; re-time it after a pilot
   PAYMENT_TEXT: "$1.50",
 
   // ---- Development ----------------------------------------------
@@ -916,6 +936,11 @@ const COMPLETION_CODE =
 /* ---------- Pattern assignment ------------------------------------ */
 function eligiblePatterns() {
   let ps = PATTERNS.slice();
+  // The practice pattern is spent on practice; seeing it twice would
+  // make its second run an odd hybrid of practice and data.
+  if (CONFIG.PRACTICE_PATTERN) {
+    ps = ps.filter(p => p.id !== CONFIG.PRACTICE_PATTERN);
+  }
   if (CONFIG.EXCLUDE_INVALID_PATTERNS) {
     const dropped = ps.filter(p => !p.valid).map(p => p.name);
     if (dropped.length) {
@@ -938,8 +963,10 @@ function assignPatterns() {
     if (hit.length) return hit;
     console.warn('No pattern with id "' + FORCE_PATTERN + '"; assigning at random.');
   }
-  return jsPsych.randomization.sampleWithoutReplacement(
-    pool, Math.min(CONFIG.PATTERNS_PER_PARTICIPANT, pool.length));
+  const n = CONFIG.PATTERNS_PER_PARTICIPANT === "all"
+    ? pool.length
+    : Math.min(CONFIG.PATTERNS_PER_PARTICIPANT, pool.length);
+  return jsPsych.randomization.sampleWithoutReplacement(pool, n);
 }
 
 /* Random A/B/C/D relabelling (optional counterbalancing). */
@@ -963,42 +990,53 @@ function escapeHtml(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
+/* "sequence" -> "Sequence", for row labels and headings. */
+function capWord(w) { return w.charAt(0).toUpperCase() + w.slice(1); }
+
 function tile(letter, extraClass) {
   return '<span class="tile tile-' + letter + ' ' + (extraClass || '') + '">' +
          letter + '</span>';
+}
+
+/* One face-down slot for an item still in the bag. The slot that is
+   about to be drawn is marked, so the participant can see how much is
+   left and exactly which position their guess is about. */
+function slot(isNext) {
+  return '<span class="tile tile-slot' + (isNext ? ' tile-next' : '') + '">' +
+         (isNext ? '?' : '') + '</span>';
 }
 
 function bagRow(index, items, opts) {
   opts = opts || {};
   const tiles = items.map((l, i) =>
     tile(l, opts.newAt === i ? "tile-new" : "")).join("");
-  let tail = "";
-  if (opts.awaiting) {
-    tail = items.length
-      ? '<span class="next"><span class="arrow">→</span>' +
-        '<span class="tile tile-unknown">?</span></span>'
-      : '<span class="tile tile-unknown">?</span>';
+  let slots = "";
+  for (let i = 0; i < (opts.remaining || 0); i++) {
+    slots += slot(i === 0 && opts.awaiting);
   }
   return '<div class="bagrow' + (opts.current ? ' current' : ' done') + '">' +
            '<div class="rowlab">' +
-             (opts.current ? '<span class="bagicon"></span>' : '') +
-             '<span>Bag ' + index + '</span>' +
+             '<span>' + capWord(CONFIG.SEQ_WORD) + ' ' + index + '</span>' +
            '</div>' +
-           '<div class="tiles">' + tiles + tail + '</div>' +
+           '<div class="tiles">' + tiles + slots + '</div>' +
          '</div>';
 }
 
 /* history: [[letters of bag 1], ...] for bags already emptied.
-   current: {index, items, awaiting, newAt} for the bag in play. */
+   current: {index, items, remaining, awaiting, newAt} for the bag in play. */
 function scene(history, current, caption) {
   const rows = history.map((items, i) => bagRow(i + 1, items, {}));
   if (current) {
     rows.push(bagRow(current.index, current.items, {
-      current: true, awaiting: current.awaiting, newAt: current.newAt
+      current: true, remaining: current.remaining,
+      awaiting: current.awaiting, newAt: current.newAt
     }));
   }
+  /* The caption slot is kept even when empty, so the prompt below it
+     does not jump between the first draw of a bag and the rest. */
   return '<div class="scene"><div class="bags">' + rows.join("") + '</div>' +
-         (caption ? '<div class="caption">' + caption + '</div>' : '') + '</div>';
+         (caption == null ? '' : '<div class="caption">' + caption + '</div>') +
+         '</div>';
 }
 
 /* Let A/B/C/D keys stand in for button clicks. */
@@ -1016,7 +1054,7 @@ function attachKeyboard(choices) {
 
 /* A "press on" screen: a real button, plus the spacebar as a shortcut.
    (A keyboard-only screen strands anyone whose focus is elsewhere.) */
-function continueTrial(stimulus, data, label) {
+function continueTrial(stimulus, data, label, after) {
   let keyHandler = null;
   return {
     type: jsPsychHtmlButtonResponse,
@@ -1032,19 +1070,36 @@ function continueTrial(stimulus, data, label) {
       };
       document.addEventListener("keydown", keyHandler);
     },
-    on_finish: () => document.removeEventListener("keydown", keyHandler),
+    on_finish: () => {
+      document.removeEventListener("keydown", keyHandler);
+      if (after) after();
+    },
     data: data
   };
 }
 
 /* ---------- Build the trial timeline for one pattern -------------- */
-function patternTimeline(pattern, patternIndex, nPatterns) {
+/* opts: {practice: true, nBags: n} for the warm-up block. */
+function patternTimeline(pattern, patternIndex, nPatterns, opts) {
+  opts = opts || {};
   const map = makeLetterMap(pattern);
-  const bags = pattern.bags.map(b => b.split("").map(c => map[c]));
-  const choices = [...new Set(bags.flat().concat(["A", "B", "C", "D"]))].sort();
+  const source = opts.nBags ? pattern.bags.slice(0, opts.nBags) : pattern.bags;
+  const bags = source.map(b => b.split("").map(c => map[c]));
+  const tag = opts.practice ? '<div class="tag">practice</div>' : '';
+  const choices = [...new Set(pattern.bags.join("").split("").map(c => map[c])
+                              .concat(["A", "B", "C", "D"]))].sort();
 
   const timeline = [];
   const history = [];   // bags already emptied, in order
+
+  /* The draw and the next prediction share one screen, so nothing is
+     timed: the item that just came out is on screen, labelled with what
+     the participant guessed, while the next guess is being made. */
+  let lastChoice = null;
+  const echo = () =>
+    (CONFIG.SHOW_CHOICE_ECHO && lastChoice)
+      ? '<span class="chose">You chose <b>' + escapeHtml(lastChoice) + '</b></span>'
+      : '';
 
   bags.forEach((bag, bagIndex) => {
     const drawn = [];
@@ -1058,9 +1113,13 @@ function patternTimeline(pattern, patternIndex, nPatterns) {
         let keyHandler = null;
         timeline.push({
           type: jsPsychHtmlButtonResponse,
-          stimulus:
-            '<div class="screen">' +
-              scene(past, { index: bagIndex + 1, items: snapshot, awaiting: true }) +
+          stimulus: () =>
+            '<div class="screen">' + tag +
+              scene(past, { index: bagIndex + 1, items: snapshot,
+                           remaining: bag.length - snapshot.length,
+                           awaiting: true,
+                           newAt: drawIndex > 0 ? snapshot.length - 1 : -1 },
+                    echo()) +
               '<p class="prompt">Which letter will come out next?</p>' +
             '</div>',
           choices: choices,
@@ -1072,9 +1131,11 @@ function patternTimeline(pattern, patternIndex, nPatterns) {
             if (keyHandler) document.removeEventListener("keydown", keyHandler);
             data.predicted = choices[data.response];
             data.correct = data.predicted === actual;
+            lastChoice = data.predicted;
           },
           data: {
             screen: "prediction",
+            is_practice: !!opts.practice,
             group: pattern.group,
             pattern_id: pattern.id,
             pattern_name: pattern.name,
@@ -1095,43 +1156,19 @@ function patternTimeline(pattern, patternIndex, nPatterns) {
       }
 
       drawn.push(actual);
-      const afterDraw = drawn.slice();
-
-      timeline.push({
-        type: jsPsychHtmlKeyboardResponse,
-        choices: "NO_KEYS",
-        trial_duration: CONFIG.REVEAL_DURATION_MS,
-        stimulus: () => {
-          const last = jsPsych.data.get().filter({ screen: "prediction" }).last(1).values()[0];
-          let caption = "";
-          if (CONFIG.SHOW_ACCURACY_FEEDBACK && last && last.pattern_id === pattern.id &&
-              last.bag_index === bagIndex + 1 && last.draw_index === drawIndex + 1) {
-            caption = last.correct
-              ? '<span class="fb ok">Correct</span>'
-              : '<span class="fb no">Not this time — you said ' +
-                escapeHtml(last.predicted) + '</span>';
-          }
-          return '<div class="screen">' +
-                   scene(past, { index: bagIndex + 1, items: afterDraw,
-                                 newAt: afterDraw.length - 1 }, caption) +
-                 '</div>';
-        },
-        data: {
-          screen: "reveal", pattern_id: pattern.id,
-          bag_index: bagIndex + 1, draw_index: drawIndex + 1, actual: actual
-        }
-      });
     });
 
     history.push(drawn.slice());
     const emptied = history.slice();
 
     timeline.push(continueTrial(
-      '<div class="screen">' + scene(emptied, null) + '</div>',
-      { screen: "bag_end", pattern_id: pattern.id, bag_index: bagIndex + 1 },
+      () => '<div class="screen">' + tag + scene(emptied, null, echo()) + '</div>',
+      { screen: "bag_end", pattern_id: pattern.id, bag_index: bagIndex + 1,
+        is_practice: !!opts.practice },
       bagIndex < bags.length - 1
-        ? "Start " + CONFIG.BAG_WORD + " " + (bagIndex + 2)
-        : "Continue"));
+        ? "Start " + CONFIG.SEQ_WORD + " " + (bagIndex + 2)
+        : "Continue",
+      () => { lastChoice = null; }));   // a new bag starts with a clean caption
   });
 
   return { timeline: timeline, letter_map: map };
@@ -1156,9 +1193,14 @@ function devURL(patternId, keepIntro) {
   return window.location.pathname + "?" + q.join("&");
 }
 
+/* Which rule the panel is currently describing. A session can run
+   several rules in a row, so this follows the timeline. */
+let DEV_SHOWING = null;
+
 function renderDevPanel(assigned) {
   if (!DEV) return;
   const current = assigned[0];
+  DEV_SHOWING = current ? current.id : null;
   const groups = [];
   PATTERNS.forEach(p => {
     let g = groups.find(x => x.name === p.group);
@@ -1209,19 +1251,31 @@ function renderDevPanel(assigned) {
     el.classList.toggle("folded");
 }
 
+/* Retarget the panel when the timeline moves on to the next rule. */
+function devShowPattern(id) {
+  if (id === DEV_SHOWING) return;
+  const p = PATTERNS.filter(x => x.id === id)[0];
+  if (!p) return;
+  DEV_SHOWING = id;
+  document.querySelector("#devpanel .dp-group").textContent = p.group;
+  document.querySelector("#devpanel .dp-name").textContent = p.name;
+  document.querySelector("#devpanel .dp-bags").innerHTML =
+    p.bags.map((b, i) =>
+      '<div><span>' + (i + 1) + '</span>' + escapeHtml(b) + '</div>').join("");
+  document.getElementById("dp-jump").value = id;
+}
+
 /* Live position readout, driven by each trial's own data. */
 function devStatus(trial) {
   if (!DEV) return;
   const box = document.getElementById("dp-status");
   if (!box) return;
   const d = (trial && trial.data) || {};
+  if (d.pattern_id) devShowPattern(d.pattern_id);
   let text;
   if (d.screen === "prediction") {
     text = "bag " + d.bag_index + " · predicting draw " +
            d.draw_index + " of " + d.draws_in_bag;
-  } else if (d.screen === "reveal") {
-    text = "bag " + d.bag_index + " · drew " + d.actual +
-           " (" + d.draw_index + ")";
   } else if (d.screen === "bag_end") {
     text = "bag " + d.bag_index + " empty";
   } else {
@@ -1258,50 +1312,42 @@ jsPsych.data.addProperties({
 });
 
 /* ---------- Front matter ------------------------------------------ */
-const consent = {
-  type: jsPsychHtmlButtonResponse,
-  choices: ["I agree — begin the study"],
-  stimulus:
+/* continueTrial gives every screen the same button, clickable or space.
+   The stimulus is a function so the group count is read at run time from
+   the patterns actually assigned rather than hard-coded here. */
+const consent = continueTrial(
+  () =>
     '<div class="screen text">' +
-      '<h1>Consent to participate</h1>' +
-      '<p>This is a research study about how people notice patterns. ' +
-         'You will watch items being drawn out of ' + CONFIG.BAG_WORD +
-         's and guess what comes next.</p>' +
-      '<p>The study will take about ' + CONFIG.ESTIMATED_MINUTES +
-         ' minutes, and you can stop at any time by closing the window. ' +
-         'Data is stored anonymously.</p>' +
+      '<h1>Prediction Task</h1>' +
+      '<p>In this task, you will see multiple sequences of letters. Your job is to predict the next letter by clicking the A, B, C, or D buttons.</p>'+
+    '<p>After making your guess, the correct letter will be revealed. You will do this for each letter in the sequence.</p>' +
+     '<p> You will then move on to the next sequence. There are four sequences per group, and there are ' + assigned.length + ' groups. </p>' +
+     "<p> Let's start with a practice trial.</p>"+
     '</div>',
-  data: { screen: "consent" }
-};
+  { screen: "consent" }, "Next");
 
-const howItWorks = continueTrial(
-  '<div class="screen text">' +
-    '<h1>How this works</h1>' +
-    '<p>You will be handed a ' + CONFIG.BAG_WORD + ' holding lettered items — ' +
-       '<b>A</b>, <b>B</b>, <b>C</b> and <b>D</b>.</p>' +
-    '<div class="tiles demo">' +
-      '<span class="tile tile-A">A</span><span class="tile tile-B">B</span>' +
-      '<span class="tile tile-C">C</span><span class="tile tile-D">D</span>' +
-    '</div>' +
-    '<p>You cannot see inside the ' + CONFIG.BAG_WORD + '.</p>' +
-  '</div>',
-  { screen: "instructions_how" }, "Next");
+/* ---------- Practice ----------------------------------------------- */
+/* The warm-up teaches the mechanics, so it stands in for the old
+   "How this works" / "Your job" pages. Its rows carry is_practice. */
+const practicePattern = CONFIG.PRACTICE_PATTERN
+  ? PATTERNS.filter(p => p.id === CONFIG.PRACTICE_PATTERN)[0]
+  : null;
 
-const yourJob = continueTrial(
-  '<div class="screen text">' +
-    '<h1>Your job</h1>' +
-    '<ul>' +
-      '<li>Before each item is pulled out, <b>guess which letter it will be</b>. ' +
-          'Then the item comes out and stays on screen, so you can always see ' +
-          'everything drawn so far.</li>' +
-      '<li>Keep going until the ' + CONFIG.BAG_WORD +
-          ' is empty. Then you get a new one.</li>' +
-      '<li>Even if you are not sure what comes next, make your best guess.</li>' +
-    '</ul>' +
-    (CONFIG.ALLOW_KEYBOARD
-      ? '<p class="hint">Click a letter, or press its key on the keyboard.</p>' : '') +
-  '</div>',
-  { screen: "instructions_job" }, "Begin");
+const practice = [];
+if (practicePattern) {
+  practice.push(...patternTimeline(practicePattern, 0, 1, {
+    practice: true, nBags: CONFIG.PRACTICE_SEQUENCES
+  }).timeline);
+  practice.push(continueTrial(
+    '<div class="screen text"><h2>That was practice</h2>' +
+    '<p>The study starts now.</p>' +
+    "<p> Please try your best! If you don't know what letter comes next, make your best guess.</p>"+
+    '</div>',
+    { screen: "practice_end" }, "Begin"));
+} else if (CONFIG.PRACTICE_PATTERN) {
+  console.warn('No pattern with id "' + CONFIG.PRACTICE_PATTERN +
+               '"; running without practice.');
+}
 
 /* ---------- Main body --------------------------------------------- */
 const assigned = assignPatterns();
@@ -1316,39 +1362,14 @@ assigned.forEach((pattern, i) => {
   body.push(...built.timeline);
   if (i < assigned.length - 1) {
     body.push(continueTrial(
-      '<div class="screen text"><h2>Take a breath</h2>' +
-      '<p>That set of ' + CONFIG.BAG_WORD + 's is finished. ' +
+      '<div class="screen text"><h2>Set completed</h2>' +
+      '<p>That set of ' + CONFIG.SEQ_WORD + 's is finished. ' +
       'The next set is unrelated to the one you just saw.</p></div>',
       { screen: "break" }, "Continue"));
   }
 });
 
 /* ---------- Back matter ------------------------------------------- */
-const strategy = {
-  type: jsPsychSurveyHtmlForm,
-  preamble: '<div class="screen text"><h2>Almost done</h2>' +
-            '<p>In a sentence or two: did you notice anything about how the ' +
-            CONFIG.BAG_WORD + 's were filled? If you had a strategy, what was it?</p></div>',
-  html: '<textarea name="strategy" rows="5" cols="60" ' +
-        'placeholder="Type here. &quot;No idea&quot; is a fine answer."></textarea>',
-  data: { screen: "strategy" }
-};
-
-const demographics = {
-  type: jsPsychSurveyHtmlForm,
-  preamble: '<div class="screen text"><h2>A few last questions</h2>' +
-            '<p>All optional.</p></div>',
-  html:
-    '<p><label>Age <input name="age" type="number" min="18" max="120" size="4"></label></p>' +
-    '<p><label>Gender <input name="gender" type="text" size="20"></label></p>' +
-    '<p><label>Is English your first language? ' +
-      '<select name="english"><option value=""></option>' +
-      '<option>Yes</option><option>No</option></select></label></p>' +
-    '<p><label>Anything go wrong (page glitches, interruptions)?<br>' +
-      '<textarea name="problems" rows="2" cols="50"></textarea></label></p>',
-  data: { screen: "demographics" }
-};
-
 const debrief = {
   type: jsPsychHtmlKeyboardResponse,
   choices: "NO_KEYS",
@@ -1358,9 +1379,10 @@ const debrief = {
 };
 
 /* ---------- Run ---------------------------------------------------- */
+/* ?dev=1 jumps straight to a rule, so it skips the intro and practice. */
 const timeline = SKIP_INTRO
-  ? [...body, strategy, demographics, debrief]
-  : [consent, howItWorks, yourJob, ...body, strategy, demographics, debrief];
+  ? [...body, debrief]
+  : [consent, ...practice, ...body, debrief];
 
 if (IS_MTURK_PREVIEW) {
   document.getElementById("jspsych-target").innerHTML =

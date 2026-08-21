@@ -1,0 +1,3 @@
+# Participant data written by server.py — never commit real responses.
+data/*.csv
+.DS_Store

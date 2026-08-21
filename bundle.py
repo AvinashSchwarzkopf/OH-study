@@ -32,7 +32,7 @@ parts = [
     "</head>", "<body>", '<div id="jspsych-target"></div>',
 ]
 for f in ["lib/jspsych.js", "lib/plugin-html-button-response.js",
-          "lib/plugin-html-keyboard-response.js", "lib/plugin-survey-html-form.js", "js/patterns.js"]:
+          "lib/plugin-html-keyboard-response.js", "js/patterns.js"]:
     parts += ["<script>", read(*f.split("/")), "</script>"]
 parts += ["<script>", config, "</script>",
           "<script>", read("js", "experiment.js"), "</script>",

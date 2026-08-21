@@ -24,50 +24,42 @@ jsPsych.data.addProperties({
 });
 
 /* ---------- Front matter ------------------------------------------ */
-const consent = {
-  type: jsPsychHtmlButtonResponse,
-  choices: ["I agree — begin the study"],
-  stimulus:
+/* continueTrial gives every screen the same button, clickable or space.
+   The stimulus is a function so the group count is read at run time from
+   the patterns actually assigned rather than hard-coded here. */
+const consent = continueTrial(
+  () =>
     '<div class="screen text">' +
-      '<h1>Consent to participate</h1>' +
-      '<p>This is a research study about how people notice patterns. ' +
-         'You will watch items being drawn out of ' + CONFIG.BAG_WORD +
-         's and guess what comes next.</p>' +
-      '<p>The study will take about N' + // + CONFIG.ESTIMATED_MINUTES +
-         ' minutes, and you can stop at any time by closing the window. ' +
-         'Data is stored anonymously.</p>' +
+      '<h1>Prediction Task</h1>' +
+      '<p>In this task, you will see multiple sequences of letters. Your job is to predict the next letter by clicking the A, B, C, or D buttons.</p>'+
+    '<p>After making your guess, the correct letter will be revealed. You will do this for each letter in the sequence.</p>' +
+     '<p> You will then move on to the next sequence. There are four sequences per group, and there are ' + assigned.length + ' groups. </p>' +
+     "<p> Let's start with a practice trial.</p>"+
     '</div>',
-  data: { screen: "consent" }
-};
+  { screen: "consent" }, "Next");
 
-const howItWorks = continueTrial(
-  '<div class="screen text">' +
-    '<h1>How this works</h1>' +
-    '<p>You will be handed a ' + CONFIG.BAG_WORD + ' holding lettered items — ' +
-       '<b>A</b>, <b>B</b>, <b>C</b> and <b>D</b>.</p>' +
-    '<div class="tiles demo">' +
-      '<span class="tile tile-A">A</span><span class="tile tile-B">B</span>' +
-      '<span class="tile tile-C">C</span><span class="tile tile-D">D</span>' +
-    '</div>' +
-    '<p>You cannot see inside the ' + CONFIG.BAG_WORD + '.</p>' +
-  '</div>',
-  { screen: "instructions_how" }, "Next");
+/* ---------- Practice ----------------------------------------------- */
+/* The warm-up teaches the mechanics, so it stands in for the old
+   "How this works" / "Your job" pages. Its rows carry is_practice. */
+const practicePattern = CONFIG.PRACTICE_PATTERN
+  ? PATTERNS.filter(p => p.id === CONFIG.PRACTICE_PATTERN)[0]
+  : null;
 
-const yourJob = continueTrial(
-  '<div class="screen text">' +
-    '<h1>Your job</h1>' +
-    '<ul>' +
-      '<li>Before each item is pulled out, <b>guess which letter it will be</b>. ' +
-          'Then the item comes out and stays on screen, so you can always see ' +
-          'everything drawn so far.</li>' +
-      '<li>Keep going until the ' + CONFIG.BAG_WORD +
-          ' is empty. Then you get a new one.</li>' +
-      '<li>Even if you are not sure what comes next, make your best guess.</li>' +
-    '</ul>' +
-    (CONFIG.ALLOW_KEYBOARD
-      ? '<p class="hint">Click a letter, or press its key on the keyboard.</p>' : '') +
-  '</div>',
-  { screen: "instructions_job" }, "Begin");
+const practice = [];
+if (practicePattern) {
+  practice.push(...patternTimeline(practicePattern, 0, 1, {
+    practice: true, nBags: CONFIG.PRACTICE_SEQUENCES
+  }).timeline);
+  practice.push(continueTrial(
+    '<div class="screen text"><h2>That was practice</h2>' +
+    '<p>The study starts now.</p>' +
+    "<p> Please try your best! If you don't know what letter comes next, make your best guess.</p>"+
+    '</div>',
+    { screen: "practice_end" }, "Begin"));
+} else if (CONFIG.PRACTICE_PATTERN) {
+  console.warn('No pattern with id "' + CONFIG.PRACTICE_PATTERN +
+               '"; running without practice.');
+}
 
 /* ---------- Main body --------------------------------------------- */
 const assigned = assignPatterns();
@@ -82,39 +74,14 @@ assigned.forEach((pattern, i) => {
   body.push(...built.timeline);
   if (i < assigned.length - 1) {
     body.push(continueTrial(
-      '<div class="screen text"><h2>Take a breath</h2>' +
-      '<p>That set of ' + CONFIG.BAG_WORD + 's is finished. ' +
+      '<div class="screen text"><h2>Set completed</h2>' +
+      '<p>That set of ' + CONFIG.SEQ_WORD + 's is finished. ' +
       'The next set is unrelated to the one you just saw.</p></div>',
       { screen: "break" }, "Continue"));
   }
 });
 
 /* ---------- Back matter ------------------------------------------- */
-const strategy = {
-  type: jsPsychSurveyHtmlForm,
-  preamble: '<div class="screen text"><h2>Almost done</h2>' +
-            '<p>In a sentence or two: did you notice anything about how the ' +
-            CONFIG.BAG_WORD + 's were filled? If you had a strategy, what was it?</p></div>',
-  html: '<textarea name="strategy" rows="5" cols="60" ' +
-        'placeholder="Type here. &quot;No idea&quot; is a fine answer."></textarea>',
-  data: { screen: "strategy" }
-};
-
-const demographics = {
-  type: jsPsychSurveyHtmlForm,
-  preamble: '<div class="screen text"><h2>A few last questions</h2>' +
-            '<p>All optional.</p></div>',
-  html:
-    '<p><label>Age <input name="age" type="number" min="18" max="120" size="4"></label></p>' +
-    '<p><label>Gender <input name="gender" type="text" size="20"></label></p>' +
-    '<p><label>Is English your first language? ' +
-      '<select name="english"><option value=""></option>' +
-      '<option>Yes</option><option>No</option></select></label></p>' +
-    '<p><label>Anything go wrong (page glitches, interruptions)?<br>' +
-      '<textarea name="problems" rows="2" cols="50"></textarea></label></p>',
-  data: { screen: "demographics" }
-};
-
 const debrief = {
   type: jsPsychHtmlKeyboardResponse,
   choices: "NO_KEYS",
@@ -124,9 +91,10 @@ const debrief = {
 };
 
 /* ---------- Run ---------------------------------------------------- */
+/* ?dev=1 jumps straight to a rule, so it skips the intro and practice. */
 const timeline = SKIP_INTRO
-  ? [...body, strategy, demographics, debrief]
-  : [consent, howItWorks, yourJob, ...body, strategy, demographics, debrief];
+  ? [...body, debrief]
+  : [consent, ...practice, ...body, debrief];
 
 if (IS_MTURK_PREVIEW) {
   document.getElementById("jspsych-target").innerHTML =

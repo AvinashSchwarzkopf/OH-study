@@ -15,9 +15,14 @@ function devURL(patternId, keepIntro) {
   return window.location.pathname + "?" + q.join("&");
 }
 
+/* Which rule the panel is currently describing. A session can run
+   several rules in a row, so this follows the timeline. */
+let DEV_SHOWING = null;
+
 function renderDevPanel(assigned) {
   if (!DEV) return;
   const current = assigned[0];
+  DEV_SHOWING = current ? current.id : null;
   const groups = [];
   PATTERNS.forEach(p => {
     let g = groups.find(x => x.name === p.group);
@@ -68,19 +73,31 @@ function renderDevPanel(assigned) {
     el.classList.toggle("folded");
 }
 
+/* Retarget the panel when the timeline moves on to the next rule. */
+function devShowPattern(id) {
+  if (id === DEV_SHOWING) return;
+  const p = PATTERNS.filter(x => x.id === id)[0];
+  if (!p) return;
+  DEV_SHOWING = id;
+  document.querySelector("#devpanel .dp-group").textContent = p.group;
+  document.querySelector("#devpanel .dp-name").textContent = p.name;
+  document.querySelector("#devpanel .dp-bags").innerHTML =
+    p.bags.map((b, i) =>
+      '<div><span>' + (i + 1) + '</span>' + escapeHtml(b) + '</div>').join("");
+  document.getElementById("dp-jump").value = id;
+}
+
 /* Live position readout, driven by each trial's own data. */
 function devStatus(trial) {
   if (!DEV) return;
   const box = document.getElementById("dp-status");
   if (!box) return;
   const d = (trial && trial.data) || {};
+  if (d.pattern_id) devShowPattern(d.pattern_id);
   let text;
   if (d.screen === "prediction") {
     text = "bag " + d.bag_index + " · predicting draw " +
            d.draw_index + " of " + d.draws_in_bag;
-  } else if (d.screen === "reveal") {
-    text = "bag " + d.bag_index + " · drew " + d.actual +
-           " (" + d.draw_index + ")";
   } else if (d.screen === "bag_end") {
     text = "bag " + d.bag_index + " empty";
   } else {
