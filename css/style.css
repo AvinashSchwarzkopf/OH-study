@@ -1,0 +1,184 @@
+:root{
+  --bg:#f7f6f3; --ink:#26241f; --muted:#6d6a63; --line:#dedbd4; --card:#fff;
+  --A:#2457c5; --B:#d32f2f; --C:#2e8b3d; --D:#111111; --X:#7a7a7a;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  font-size:17px; line-height:1.55;
+}
+#jspsych-target{max-width:860px; margin:0 auto; padding:40px 24px 80px;}
+#study-progress{max-width:860px; margin:20px auto 0; padding:0 24px;}
+.study-progress-track{width:100%; height:14px; background:#e9e6df; border-radius:999px; overflow:hidden; border:1px solid var(--line);}
+.study-progress-fill{width:0%; height:100%; background:linear-gradient(90deg, var(--A), var(--C)); transition:width .25s ease;}
+.study-progress-label{margin-top:8px; text-align:right; color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em;}
+.consent-pdf-page{padding-top:18px}
+.consent-pdf-shell{display:flex; align-items:center; justify-content:center; gap:18px; margin:18px 0 12px}
+.consent-pdf-viewer{width:min(100%, 760px); background:#f7f6f3; border:1px solid var(--line); border-radius:12px; padding:12px; text-align:center}
+#consent-pdf-canvas{max-width:100%; border-radius:8px; border:1px solid var(--line); background:#fff; display:block; margin:0 auto}
+.consent-pdf-status, .consent-pdf-pagecount{font-size:13px; color:var(--muted); margin-bottom:10px}
+.consent-pdf-arrow{width:52px; height:52px; border:1px solid var(--line); border-radius:50%; background:#fff; color:var(--ink); font-size:28px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.consent-pdf-arrow:disabled{opacity:.35; cursor:default}
+#jspsych-html-button-response-btngroup{display:flex; justify-content:center; align-items:center; margin-top:18px}
+#jspsych-html-button-response-btngroup .jspsych-btn,
+#jspsych-html-button-response-btngroup .jspsych-btn.wide{
+  display:block;
+  width:100%;
+  max-width:420px;
+  min-width:0;
+  margin:0 auto;
+  padding:18px 24px;
+  font-size:22px;
+  font-weight:600;
+  line-height:1.2;
+  text-align:center;
+  border-radius:12px;
+  border:1px solid #d7d2cc;
+  background:#f2f0ee;
+  color:#2f2d2a;
+  box-shadow:none;
+}
+#jspsych-html-button-response-btngroup .jspsych-btn:hover,
+#jspsych-html-button-response-btngroup .jspsych-btn:active{
+  background:#ece8e3;
+  border-color:#cfc9c2;
+}
+.jspsych-content{max-width:860px}
+h1{font-size:28px; margin:0 0 18px} h2{font-size:22px; margin:0 0 14px}
+p{margin:0 0 14px}
+.screen{text-align:center}
+.screen.text{text-align:left; background:var(--card); border:1px solid var(--line);
+  border-radius:14px; padding:28px 32px; box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.screen.text ul{margin:0 0 14px 20px; padding:0} .screen.text li{margin-bottom:8px}
+.hint{color:var(--muted); font-size:15px}
+.warn{color:#a3341f}
+.prompt{font-size:20px; font-weight:600; margin-top:26px}
+
+/* --- the bags, stacked oldest first --- */
+/* Column of rows; a fixed-width label keeps "Bag n" lined up down the
+   page, and every row is the same width so the finished cards align. */
+.bags{display:inline-flex; flex-direction:column; align-items:stretch;
+  gap:10px; margin:6px 0 4px; text-align:left}
+.bagrow{display:flex; align-items:center; gap:14px; padding:7px 14px 7px 10px;
+  border:1px solid transparent; border-radius:13px}
+.rowlab{flex:0 0 60px; display:flex; align-items:center; gap:7px;
+  justify-content:flex-end; color:var(--muted); font-size:13px;
+  letter-spacing:.03em; white-space:nowrap}
+.bagrow.current .rowlab{color:var(--ink); font-weight:600}
+/* A finished bag becomes its own card. */
+.bagrow.done{background:var(--card); border-color:var(--line);
+  box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.bagrow.done .rowlab, .bagrow.done .tiles{opacity:.75}
+.tiles{display:flex; align-items:flex-start; gap:6px; flex-wrap:wrap; min-height:44px}
+.bagrow.done .tiles{min-height:32px}
+.tiles.demo{justify-content:flex-start; margin:16px 0 20px}
+
+/* a tile with its color name underneath, for anyone who can't tell the colors apart */
+.tilewrap{display:inline-flex; flex-direction:column; align-items:center; gap:3px}
+.tilename{font-size:11px; line-height:1; color:var(--muted); text-transform:lowercase}
+.bagrow.done .tilename{font-size:9px}
+.tile{width:42px; height:42px; flex:0 0 auto; border-radius:9px; color:#fff;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:0; font-weight:700; background:var(--X);
+  box-shadow:0 1px 2px rgba(0,0,0,.18)}
+.bagrow.done .tile{width:30px; height:30px; font-size:0; border-radius:7px}
+.tile-A{background:var(--A)} .tile-B{background:var(--B)}
+.tile-C{background:var(--C)} .tile-D{background:var(--D)}
+.choice-swatch{display:inline-block; vertical-align:middle; width:18px; height:18px; margin-right:6px; border-radius:5px; box-shadow:0 1px 2px rgba(0,0,0,.12)}
+/* still in the bag: face down, letter hidden */
+.tile-slot{background:#e9e6df; border:1px solid #d9d5cc; color:#b4afa5;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.07)}
+.tile-slot.tile-next{background:#f3f0e9; border:2px solid #8d887e;
+  color:var(--muted)}
+.tile-new{animation:pop .28s ease-out; outline:3px solid #26241f; outline-offset:2px}
+@keyframes pop{from{transform:scale(.4); opacity:0} to{transform:scale(1); opacity:1}}
+@media (prefers-reduced-motion:reduce){ .tile-new{animation:none} }
+
+.caption{margin-top:20px; min-height:28px}
+/* marks the warm-up block, so practice is never mistaken for the study */
+.tag{display:inline-block; margin-bottom:10px; padding:2px 11px; border-radius:20px;
+  background:#e8e4db; color:var(--muted); font-size:11px; font-weight:700;
+  letter-spacing:.14em; text-transform:uppercase}
+.chose{font-size:16px; color:var(--muted)}
+.chose b{color:var(--ink); font-weight:600}
+
+/* --- buttons --- */
+#jspsych-html-button-response-btngroup{display:flex; gap:12px;
+  justify-content:center; flex-wrap:wrap; margin-top:26px}
+.jspsych-btn{margin:0; font-size:17px; padding:11px 20px; border-radius:10px;
+  border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer;
+  font-family:inherit; transition:transform .06s ease, box-shadow .15s ease}
+.jspsych-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.jspsych-btn:active{transform:translateY(1px)}
+.jspsych-btn.wide{min-width:280px; text-align:left}
+#jspsych-html-button-response-btngroup .jspsych-btn.tile-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:74px; height:74px; min-width:0; max-width:none; margin:0; padding:0;
+  border:none; border-radius:9px; font-size:0; font-weight:700; line-height:1;
+  color:#fff; background:var(--X); box-shadow:0 1px 2px rgba(0,0,0,.18);
+}
+#jspsych-html-button-response-btngroup .jspsych-btn.tile-btn:hover,
+#jspsych-html-button-response-btngroup .jspsych-btn.tile-btn:active{
+  box-shadow:0 1px 2px rgba(0,0,0,.18); transform:none;
+}
+#jspsych-html-button-response-btngroup .jspsych-btn.tile-btn.tile-A{background:var(--A)}
+#jspsych-html-button-response-btngroup .jspsych-btn.tile-btn.tile-B{background:var(--B)}
+#jspsych-html-button-response-btngroup .jspsych-btn.tile-btn.tile-C{background:var(--C)}
+#jspsych-html-button-response-btngroup .jspsych-btn.tile-btn.tile-D{background:var(--D)}
+
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:26px;
+  letter-spacing:.08em; background:#26241f; color:#fff; padding:14px 20px;
+  border-radius:10px; display:inline-block; margin:6px 0 16px}
+textarea,input,select{font-family:inherit; font-size:16px; padding:8px;
+  border:1px solid var(--line); border-radius:8px; background:#fff}
+.jspsych-btn.go{min-width:200px; font-weight:600}
+.kbd{display:inline-block; margin-left:8px; padding:1px 7px; border-radius:5px;
+  border:1px solid var(--line); background:var(--bg); color:var(--muted);
+  font-size:12px; letter-spacing:.04em; vertical-align:1px}
+
+@media (max-width:640px){
+  #jspsych-target{padding:24px 14px 60px}
+  .bags{gap:8px}
+  .bagrow{gap:9px; padding:6px 9px}
+  .rowlab{flex-basis:46px; font-size:12px}
+  .tile-btn{width:60px; height:60px; font-size:26px}
+  .prompt{font-size:18px}
+  h1{font-size:24px} h2{font-size:20px}
+  #jspsych-html-button-response-btngroup{gap:10px}
+}
+
+/* --- developer panel (?dev=1) --- */
+#devpanel{position:fixed; top:14px; right:14px; z-index:99; width:212px;
+  background:var(--card); border:1px solid var(--line); border-radius:11px;
+  box-shadow:0 4px 18px rgba(0,0,0,.10); font-size:12px; line-height:1.45;
+  overflow:hidden}
+#devpanel .dp-head{display:flex; justify-content:space-between; align-items:center;
+  padding:5px 8px 5px 11px; background:#26241f; color:#fff;
+  font-size:10px; font-weight:700; letter-spacing:.14em}
+#devpanel .dp-head button{background:none; border:none; color:#fff; cursor:pointer;
+  font-size:15px; line-height:1; padding:0 3px; font-family:inherit}
+#devpanel.folded .dp-body{display:none}
+#devpanel .dp-body{padding:11px}
+#devpanel .dp-group{color:var(--muted); font-size:10px; letter-spacing:.07em;
+  text-transform:uppercase}
+#devpanel .dp-name{font-size:15px; font-weight:700; margin-bottom:7px;
+  line-height:1.25}
+#devpanel .dp-status{background:var(--bg); border-radius:6px; padding:5px 8px;
+  color:var(--ink); font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px; margin-bottom:9px}
+#devpanel .dp-bags{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px; color:var(--muted); margin-bottom:10px; letter-spacing:.5px}
+#devpanel .dp-bags span{display:inline-block; width:15px; color:#a9a49a}
+#devpanel .dp-field{display:block; color:var(--muted); font-size:10px;
+  letter-spacing:.07em; text-transform:uppercase}
+#devpanel select{width:100%; margin-top:4px; font-size:12px; padding:5px 6px;
+  border:1px solid var(--line); border-radius:7px; background:#fff}
+#devpanel .dp-check{display:flex; align-items:center; gap:6px; margin-top:8px;
+  color:var(--muted); font-size:11px; text-transform:none; letter-spacing:0}
+#devpanel .dp-check input{width:auto; margin:0}
+#devpanel .dp-links{display:flex; gap:10px; margin-top:9px; padding-top:8px;
+  border-top:1px solid var(--line)}
+#devpanel a{color:var(--A); font-size:11px; text-decoration:none}
+#devpanel a:hover{text-decoration:underline}
+@media (max-width:860px){ #devpanel{position:static; width:auto; margin:0 auto 18px} }
