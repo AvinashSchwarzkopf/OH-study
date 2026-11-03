@@ -150,10 +150,49 @@ const consent = continueTrial(
       '<h1>Prediction Task</h1>' +
       '<p>Thank you for participating in our study! In this task, you will see multiple sequences of tiles. Your job is to predict the color of the next tile.</p>'+
     '<p>After making your guess, the next tile will be revealed. You will do this for each tile in the sequence.</p>' +
-     '<p> You will then move on to the next sequence. There are four sequences per group, and there are 8-9 groups. </p>' +
-     "<p> Let's start with a practice trial. Make sure you can see all the colors clearly. </p>"+
+     '<p> There are four sequences in each set, and a total of 8-9 sets of sets. </p>' +
+     "<p> Let's start with a practice trial on one set. Make sure you can see all the colors clearly. </p>"+
     '</div>',
   { screen: "consent" }, "Next");
+
+/* ---------- Demographics -------------------------------------------- */
+/* Shown right after the consent PDF is accepted. The answers also become
+   columns (age, sex, education) on every row, so they sit next to the
+   trial data without joining on the demographics row. */
+const demographics = {
+  type: jsPsychSurveyHtmlForm,
+  preamble: '<div class="demo-intro"><h1>About you</h1>' +
+    '<p>Before we begin, three quick questions.</p></div>',
+  html:
+    '<div class="demo-form">' +
+      '<label for="demo-age">Age</label>' +
+      '<input type="number" id="demo-age" name="age" min="18" max="120" step="1" required>' +
+      '<label for="demo-sex">Sex</label>' +
+      '<select id="demo-sex" name="sex" required>' +
+        '<option value="" selected disabled>Select…</option>' +
+        '<option>Female</option><option>Male</option><option>Intersex</option>' +
+        '<option>Prefer not to say</option>' +
+      '</select>' +
+      '<label for="demo-education">Highest level of education completed</label>' +
+      '<select id="demo-education" name="education" required>' +
+        '<option value="" selected disabled>Select…</option>' +
+        '<option>Less than high school</option>' +
+        '<option>High school diploma or equivalent</option>' +
+        '<option>Some college</option>' +
+        '<option>Associate degree</option>' +
+        "<option>Bachelor's degree</option>" +
+        "<option>Master's degree</option>" +
+        '<option>Doctoral or professional degree</option>' +
+        '<option>Prefer not to say</option>' +
+      '</select>' +
+    '</div>',
+  button_label: "Next",
+  data: { screen: "demographics" },
+  on_finish: data => {
+    const r = data.response || {};
+    jsPsych.data.addProperties({ age: r.age, sex: r.sex, education: r.education });
+  }
+};
 
 /* ---------- Practice ----------------------------------------------- */
 /* The warm-up teaches the mechanics, so it stands in for the old
@@ -169,7 +208,7 @@ if (practicePattern) {
   }).timeline);
   practice.push(continueTrial(
     '<div class="screen text"><h2>That was practice</h2>' +
-    '<p>The study starts now.</p>' +
+    '<p>The study starts now. The following sequences will be more complex than the practice trial.</p>' +
     "<p> Please try your best! If you don't know what letter comes next, make your best guess.</p>"+
     '</div>',
     { screen: "practice_end" }, "Begin"));
@@ -250,7 +289,7 @@ const debrief = {
 /* ?dev=1 jumps straight to a rule, so it skips the intro and practice. */
 const timeline = () => SKIP_INTRO
   ? [...body, debrief]
-  : [consentPdf, consent, ...practice, ...body, debrief];
+  : [consentPdf, demographics, consent, ...practice, ...body, debrief];
 
 /* jatos.js is only present when the study is served by JATOS. Outside it
    (python server.py, file://, GitHub Pages) IN_JATOS is false and the old
