@@ -47,6 +47,9 @@ const CONFIG = {
 
   // ---- Trial flow ------------------------------------------------
   ASK_ON_FIRST_DRAW: true,   // predict draw 1 of a bag (a pure guess; useful baseline)
+  // After a wrong guess the pressed button shakes and goes gray for this
+  // long (ms) before the trial moves on. 0 = no hold.
+  WRONG_DELAY_MS: 1000,
   SHOW_CHOICE_ECHO: true,    // echo "You chose X" under the bags after each draw
   // false = the letter buttons must be clicked; the A/B/C/D keys do
   // nothing. (The spacebar shortcut on Next/Begin/Continue screens is
