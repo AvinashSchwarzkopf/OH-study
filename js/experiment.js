@@ -184,6 +184,29 @@ function attachKeyboard(choices) {
   return handler;
 }
 
+/* A wrong answer is held for `ms`: the button that was pressed shakes and
+   goes gray, then the click goes through as normal. Other clicks and keys
+   during the hold are swallowed. This runs in the capture phase, ahead of
+   jsPsych's own click handler, and gets the answer from isWrong(choiceIndex)
+   so the check happens before the trial ends. */
+function holdWrongAnswer(isWrong, ms, onHold) {
+  const group = document.getElementById("jspsych-html-button-response-btngroup");
+  if (!group || !ms) return;
+  let held = false, released = false;
+  group.addEventListener("click", e => {
+    if (released) return;                      // our own re-sent click
+    const el = e.target.closest("[data-choice]");
+    if (!el) return;
+    if (!held && !isWrong(Number(el.dataset.choice))) return;   // right answer: straight through
+    e.stopPropagation(); e.preventDefault();
+    if (held) return;
+    held = true;
+    onHold(ms);
+    (el.matches("button") ? el : el.querySelector("button")).classList.add("wrong");
+    setTimeout(() => { released = true; el.click(); }, ms);
+  }, true);
+}
+
 /* A "press on" screen: a real button, plus the spacebar as a shortcut.
    (A keyboard-only screen strands anyone whose focus is elsewhere.) */
 function continueTrial(stimulus, data, label, after) {
@@ -231,6 +254,7 @@ function patternTimeline(pattern, patternIndex, nPatterns, opts) {
      timed: the item that just came out is on screen, labelled with what
      the participant guessed, while the next guess is being made. */
   let lastChoice = null;
+  let penaltyMs = 0;         // how long the current trial's wrong answer was held
   const echo = () =>
     (CONFIG.SHOW_CHOICE_ECHO && lastChoice)
       ? '<span class="chose">You chose <span class="choice-swatch tile-' + lastChoice + '"></span> <b>' + escapeHtml(colorName(lastChoice)) + '</b></span>'
@@ -265,11 +289,18 @@ function patternTimeline(pattern, patternIndex, nPatterns, opts) {
               'aria-label="' + escapeHtml(colorName(choice)) + '"></button>' +
               '<span class="tilename">' + escapeHtml(colorName(choice)) + '</span>' +
             '</span>',
-          on_load: () => { keyHandler = attachKeyboard(choices); },
+          on_load: () => {
+            keyHandler = attachKeyboard(choices);
+            penaltyMs = 0;
+            holdWrongAnswer(i => choices[i] !== actual, CONFIG.WRONG_DELAY_MS,
+                            ms => { penaltyMs = ms; });
+          },
           on_finish: data => {
             if (keyHandler) document.removeEventListener("keydown", keyHandler);
             data.predicted = choices[data.response];
             data.correct = data.predicted === actual;
+            data.penalty_ms = penaltyMs;   // wrong-answer hold, taken out of rt
+            if (penaltyMs && data.rt != null) data.rt -= penaltyMs;
             lastChoice = data.predicted;
           },
           data: {
