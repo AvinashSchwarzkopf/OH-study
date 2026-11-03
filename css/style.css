@@ -182,3 +182,23 @@ textarea,input,select{font-family:inherit; font-size:16px; padding:8px;
 #devpanel a{color:var(--A); font-size:11px; text-decoration:none}
 #devpanel a:hover{text-decoration:underline}
 @media (max-width:860px){ #devpanel{position:static; width:auto; margin:0 auto 18px} }
+
+/* wrong guess: the pressed button shakes, then goes gray */
+@keyframes shake{
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)}
+  40%{transform:translateX(5px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(3px)}}
+@keyframes fadegray{from{filter:grayscale(0); opacity:1} to{filter:grayscale(1); opacity:.5}}
+#jspsych-html-button-response-btngroup .jspsych-btn.tile-btn.wrong{
+  animation:shake .45s ease-in-out, fadegray .45s ease-in forwards}
+@media (prefers-reduced-motion:reduce){
+  #jspsych-html-button-response-btngroup .jspsych-btn.tile-btn.wrong{animation:fadegray .45s forwards}}
+
+/* demographics form */
+.demo-intro{text-align:center; margin-bottom:8px}
+.demo-form{max-width:420px; margin:0 auto; text-align:left}
+.demo-form label{display:block; margin:18px 0 6px; font-weight:600}
+.demo-form input, .demo-form select{
+  width:100%; box-sizing:border-box; font:inherit; padding:10px 12px;
+  border:1px solid var(--line); border-radius:10px; background:#fff; color:var(--ink)}
+#jspsych-survey-html-form{margin-bottom:0}
+#jspsych-survey-html-form .jspsych-btn{margin-top:26px}
