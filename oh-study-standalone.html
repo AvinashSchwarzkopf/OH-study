@@ -491,6 +491,26 @@ textarea,input,select{font-family:inherit; font-size:16px; padding:8px;
 #devpanel a:hover{text-decoration:underline}
 @media (max-width:860px){ #devpanel{position:static; width:auto; margin:0 auto 18px} }
 
+/* wrong guess: the pressed button shakes, then goes gray */
+@keyframes shake{
+  0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)}
+  40%{transform:translateX(5px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(3px)}}
+@keyframes fadegray{from{filter:grayscale(0); opacity:1} to{filter:grayscale(1); opacity:.5}}
+#jspsych-html-button-response-btngroup .jspsych-btn.tile-btn.wrong{
+  animation:shake .45s ease-in-out, fadegray .45s ease-in forwards}
+@media (prefers-reduced-motion:reduce){
+  #jspsych-html-button-response-btngroup .jspsych-btn.tile-btn.wrong{animation:fadegray .45s forwards}}
+
+/* demographics form */
+.demo-intro{text-align:center; margin-bottom:8px}
+.demo-form{max-width:420px; margin:0 auto; text-align:left}
+.demo-form label{display:block; margin:18px 0 6px; font-weight:600}
+.demo-form input, .demo-form select{
+  width:100%; box-sizing:border-box; font:inherit; padding:10px 12px;
+  border:1px solid var(--line); border-radius:10px; background:#fff; color:var(--ink)}
+#jspsych-survey-html-form{margin-bottom:0}
+#jspsych-survey-html-form .jspsych-btn{margin-top:26px}
+
 </style>
 </head>
 <body>
@@ -513,6 +533,11 @@ var jsPsychHtmlButtonResponse=function(s){"use strict";var y="2.1.0";const b={na
 <script>
 var jsPsychHtmlKeyboardResponse=function(i){"use strict";var u="2.1.0";const p={name:"html-keyboard-response",version:u,parameters:{stimulus:{type:i.ParameterType.HTML_STRING,default:void 0},choices:{type:i.ParameterType.KEYS,default:"ALL_KEYS"},prompt:{type:i.ParameterType.HTML_STRING,default:null},stimulus_duration:{type:i.ParameterType.INT,default:null},trial_duration:{type:i.ParameterType.INT,default:null},response_ends_trial:{type:i.ParameterType.BOOL,default:!0}},data:{response:{type:i.ParameterType.STRING},rt:{type:i.ParameterType.INT},stimulus:{type:i.ParameterType.STRING}},citations:{apa:"de Leeuw, J. R., Gilbert, R. A., & Luchterhandt, B. (2023). jsPsych: Enabling an Open-Source Collaborative Ecosystem of Behavioral Experiments. Journal of Open Source Software, 8(85), 5351. https://doi.org/10.21105/joss.05351 ",bibtex:'@article{Leeuw2023jsPsych, 	author = {de Leeuw, Joshua R. and Gilbert, Rebecca A. and Luchterhandt, Bj{\\" o}rn}, 	journal = {Journal of Open Source Software}, 	doi = {10.21105/joss.05351}, 	issn = {2475-9066}, 	number = {85}, 	year = {2023}, 	month = {may 11}, 	pages = {5351}, 	publisher = {Open Journals}, 	title = {jsPsych: Enabling an {Open}-{Source} {Collaborative} {Ecosystem} of {Behavioral} {Experiments}}, 	url = {https://joss.theoj.org/papers/10.21105/joss.05351}, 	volume = {8}, }  '}};class n{constructor(t){this.jsPsych=t}trial(t,e){var a='<div id="jspsych-html-keyboard-response-stimulus">'+e.stimulus+"</div>";e.prompt!==null&&(a+=e.prompt),t.innerHTML=a;var s={rt:null,key:null};const r=()=>{typeof o!="undefined"&&this.jsPsych.pluginAPI.cancelKeyboardResponse(o);var l={rt:s.rt,stimulus:e.stimulus,response:s.key};this.jsPsych.finishTrial(l)};var m=l=>{t.querySelector("#jspsych-html-keyboard-response-stimulus").className+=" responded",s.key==null&&(s=l),e.response_ends_trial&&r()};if(e.choices!="NO_KEYS")var o=this.jsPsych.pluginAPI.getKeyboardResponse({callback_function:m,valid_responses:e.choices,rt_method:"performance",persist:!1,allow_held_key:!1});e.stimulus_duration!==null&&this.jsPsych.pluginAPI.setTimeout(()=>{t.querySelector("#jspsych-html-keyboard-response-stimulus").style.visibility="hidden"},e.stimulus_duration),e.trial_duration!==null&&this.jsPsych.pluginAPI.setTimeout(r,e.trial_duration)}simulate(t,e,a,s){e=="data-only"&&(s(),this.simulate_data_only(t,a)),e=="visual"&&this.simulate_visual(t,a,s)}create_simulation_data(t,e){const a={stimulus:t.stimulus,rt:this.jsPsych.randomization.sampleExGaussian(500,50,.006666666666666667,!0),response:this.jsPsych.pluginAPI.getValidKey(t.choices)},s=this.jsPsych.pluginAPI.mergeSimulationData(a,e);return this.jsPsych.pluginAPI.ensureSimulationDataConsistency(t,s),s}simulate_data_only(t,e){const a=this.create_simulation_data(t,e);this.jsPsych.finishTrial(a)}simulate_visual(t,e,a){const s=this.create_simulation_data(t,e),r=this.jsPsych.getDisplayElement();this.trial(r,t),a(),s.rt!==null&&this.jsPsych.pluginAPI.pressKey(s.response,s.rt)}}return n.info=p,n}(jsPsychModule);
 //# sourceMappingURL=https://unpkg.com/@jspsych/plugin-html-keyboard-response@2.1.0/dist/index.browser.min.js.map
+
+</script>
+<script>
+var jsPsychSurveyHtmlForm=function(a){"use strict";var p="2.1.0";const c={name:"survey-html-form",version:p,parameters:{html:{type:a.ParameterType.HTML_STRING,default:null},preamble:{type:a.ParameterType.HTML_STRING,default:null},button_label:{type:a.ParameterType.STRING,default:"Continue"},autofocus:{type:a.ParameterType.STRING,default:""},dataAsArray:{type:a.ParameterType.BOOL,default:!1},autocomplete:{type:a.ParameterType.BOOL,default:!1}},data:{response:{type:a.ParameterType.OBJECT},rt:{type:a.ParameterType.INT}},citations:{apa:"de Leeuw, J. R., Gilbert, R. A., & Luchterhandt, B. (2023). jsPsych: Enabling an Open-Source Collaborative Ecosystem of Behavioral Experiments. Journal of Open Source Software, 8(85), 5351. https://doi.org/10.21105/joss.05351 ",bibtex:'@article{Leeuw2023jsPsych, 	author = {de Leeuw, Joshua R. and Gilbert, Rebecca A. and Luchterhandt, Bj{\\" o}rn}, 	journal = {Journal of Open Source Software}, 	doi = {10.21105/joss.05351}, 	issn = {2475-9066}, 	number = {85}, 	year = {2023}, 	month = {may 11}, 	pages = {5351}, 	publisher = {Open Journals}, 	title = {jsPsych: Enabling an {Open}-{Source} {Collaborative} {Ecosystem} of {Behavioral} {Experiments}}, 	url = {https://joss.theoj.org/papers/10.21105/joss.05351}, 	volume = {8}, }  '}};class i{constructor(l){this.jsPsych=l}trial(l,t){var u="";if(t.preamble!==null&&(u+='<div id="jspsych-survey-html-form-preamble" class="jspsych-survey-html-form-preamble">'+t.preamble+"</div>"),t.autocomplete?u+='<form id="jspsych-survey-html-form">':u+='<form id="jspsych-survey-html-form" autocomplete="off">',u+=t.html,u+='<input type="submit" id="jspsych-survey-html-form-next" class="jspsych-btn jspsych-survey-html-form" value="'+t.button_label+'"></input>',u+="</form>",l.innerHTML=u,t.autofocus!==""){var m=l.querySelectorAll("#"+t.autofocus);m.length===0?console.warn("No element found with id: "+t.autofocus):m.length>1?console.warn('The id "'+t.autofocus+'" is not unique so autofocus will not work.'):m[0].focus()}l.querySelector("#jspsych-survey-html-form").addEventListener("submit",o=>{o.preventDefault();var s=performance.now(),r=Math.round(s-y),e=l.querySelector("#jspsych-survey-html-form"),n=f(e);t.dataAsArray||(n=h(n));var v={rt:r,response:n};this.jsPsych.finishTrial(v)});var y=performance.now();function f(o){for(var s=[],r=0;r<o.elements.length;r++){var e=o.elements[r];if(!(!e.name||e.disabled||e.type==="file"||e.type==="reset"||e.type==="submit"||e.type==="button"))if(e.type==="select-multiple")for(var n=0;n<e.options.length;n++)e.options[n].selected&&s.push({name:e.name,value:e.options[n].value});else(e.type!=="checkbox"&&e.type!=="radio"||e.checked)&&s.push({name:e.name,value:e.value})}return s}function h(o){for(var s={},r=0;r<o.length;r++)s[o[r].name]=o[r].value;return s}}}return i.info=c,i}(jsPsychModule);
+//# sourceMappingURL=https://unpkg.com/@jspsych/plugin-survey-html-form@2.1.0/dist/index.browser.min.js.map
 
 </script>
 <script>
@@ -878,6 +903,9 @@ const CONFIG = {
 
   // ---- Trial flow ------------------------------------------------
   ASK_ON_FIRST_DRAW: true,   // predict draw 1 of a bag (a pure guess; useful baseline)
+  // After a wrong guess the pressed button shakes and goes gray for this
+  // long (ms) before the trial moves on. 0 = no hold.
+  WRONG_DELAY_MS: 1000,
   SHOW_CHOICE_ECHO: true,    // echo "You chose X" under the bags after each draw
   // false = the letter buttons must be clicked; the A/B/C/D keys do
   // nothing. (The spacebar shortcut on Next/Begin/Continue screens is
@@ -1109,6 +1137,29 @@ function attachKeyboard(choices) {
   return handler;
 }
 
+/* A wrong answer is held for `ms`: the button that was pressed shakes and
+   goes gray, then the click goes through as normal. Other clicks and keys
+   during the hold are swallowed. This runs in the capture phase, ahead of
+   jsPsych's own click handler, and gets the answer from isWrong(choiceIndex)
+   so the check happens before the trial ends. */
+function holdWrongAnswer(isWrong, ms, onHold) {
+  const group = document.getElementById("jspsych-html-button-response-btngroup");
+  if (!group || !ms) return;
+  let held = false, released = false;
+  group.addEventListener("click", e => {
+    if (released) return;                      // our own re-sent click
+    const el = e.target.closest("[data-choice]");
+    if (!el) return;
+    if (!held && !isWrong(Number(el.dataset.choice))) return;   // right answer: straight through
+    e.stopPropagation(); e.preventDefault();
+    if (held) return;
+    held = true;
+    onHold(ms);
+    (el.matches("button") ? el : el.querySelector("button")).classList.add("wrong");
+    setTimeout(() => { released = true; el.click(); }, ms);
+  }, true);
+}
+
 /* A "press on" screen: a real button, plus the spacebar as a shortcut.
    (A keyboard-only screen strands anyone whose focus is elsewhere.) */
 function continueTrial(stimulus, data, label, after) {
@@ -1156,6 +1207,7 @@ function patternTimeline(pattern, patternIndex, nPatterns, opts) {
      timed: the item that just came out is on screen, labelled with what
      the participant guessed, while the next guess is being made. */
   let lastChoice = null;
+  let penaltyMs = 0;         // how long the current trial's wrong answer was held
   const echo = () =>
     (CONFIG.SHOW_CHOICE_ECHO && lastChoice)
       ? '<span class="chose">You chose <span class="choice-swatch tile-' + lastChoice + '"></span> <b>' + escapeHtml(colorName(lastChoice)) + '</b></span>'
@@ -1190,11 +1242,18 @@ function patternTimeline(pattern, patternIndex, nPatterns, opts) {
               'aria-label="' + escapeHtml(colorName(choice)) + '"></button>' +
               '<span class="tilename">' + escapeHtml(colorName(choice)) + '</span>' +
             '</span>',
-          on_load: () => { keyHandler = attachKeyboard(choices); },
+          on_load: () => {
+            keyHandler = attachKeyboard(choices);
+            penaltyMs = 0;
+            holdWrongAnswer(i => choices[i] !== actual, CONFIG.WRONG_DELAY_MS,
+                            ms => { penaltyMs = ms; });
+          },
           on_finish: data => {
             if (keyHandler) document.removeEventListener("keydown", keyHandler);
             data.predicted = choices[data.response];
             data.correct = data.predicted === actual;
+            data.penalty_ms = penaltyMs;   // wrong-answer hold, taken out of rt
+            if (penaltyMs && data.rt != null) data.rt -= penaltyMs;
             lastChoice = data.predicted;
           },
           data: {
@@ -1506,12 +1565,51 @@ const consent = continueTrial(
   () =>
     '<div class="screen text">' +
       '<h1>Prediction Task</h1>' +
-      '<p>In this task, you will see multiple sequences of tiles. Your job is to predict the color of the next tile.</p>'+
+      '<p>Thank you for participating in our study! In this task, you will see multiple sequences of tiles. Your job is to predict the color of the next tile.</p>'+
     '<p>After making your guess, the next tile will be revealed. You will do this for each tile in the sequence.</p>' +
-     '<p> You will then move on to the next sequence. There are four sequences per group, and there are 8-9 groups. </p>' +
-     "<p> Let's start with a practice trial. Make sure you can see all the colors clearly. </p>"+
+     '<p> There are four sequences in each set, and a total of 8-9 sets of sets. </p>' +
+     "<p> Let's start with a practice trial on one set. Make sure you can see all the colors clearly. </p>"+
     '</div>',
   { screen: "consent" }, "Next");
+
+/* ---------- Demographics -------------------------------------------- */
+/* Shown right after the consent PDF is accepted. The answers also become
+   columns (age, sex, education) on every row, so they sit next to the
+   trial data without joining on the demographics row. */
+const demographics = {
+  type: jsPsychSurveyHtmlForm,
+  preamble: '<div class="demo-intro"><h1>About you</h1>' +
+    '<p>Before we begin, three quick questions.</p></div>',
+  html:
+    '<div class="demo-form">' +
+      '<label for="demo-age">Age</label>' +
+      '<input type="number" id="demo-age" name="age" min="18" max="120" step="1" required>' +
+      '<label for="demo-sex">Sex</label>' +
+      '<select id="demo-sex" name="sex" required>' +
+        '<option value="" selected disabled>Select…</option>' +
+        '<option>Female</option><option>Male</option><option>Intersex</option>' +
+        '<option>Prefer not to say</option>' +
+      '</select>' +
+      '<label for="demo-education">Highest level of education completed</label>' +
+      '<select id="demo-education" name="education" required>' +
+        '<option value="" selected disabled>Select…</option>' +
+        '<option>Less than high school</option>' +
+        '<option>High school diploma or equivalent</option>' +
+        '<option>Some college</option>' +
+        '<option>Associate degree</option>' +
+        "<option>Bachelor's degree</option>" +
+        "<option>Master's degree</option>" +
+        '<option>Doctoral or professional degree</option>' +
+        '<option>Prefer not to say</option>' +
+      '</select>' +
+    '</div>',
+  button_label: "Next",
+  data: { screen: "demographics" },
+  on_finish: data => {
+    const r = data.response || {};
+    jsPsych.data.addProperties({ age: r.age, sex: r.sex, education: r.education });
+  }
+};
 
 /* ---------- Practice ----------------------------------------------- */
 /* The warm-up teaches the mechanics, so it stands in for the old
@@ -1527,7 +1625,7 @@ if (practicePattern) {
   }).timeline);
   practice.push(continueTrial(
     '<div class="screen text"><h2>That was practice</h2>' +
-    '<p>The study starts now.</p>' +
+    '<p>The study starts now. The following sequences will be more complex than the practice trial.</p>' +
     "<p> Please try your best! If you don't know what letter comes next, make your best guess.</p>"+
     '</div>',
     { screen: "practice_end" }, "Begin"));
@@ -1608,7 +1706,7 @@ const debrief = {
 /* ?dev=1 jumps straight to a rule, so it skips the intro and practice. */
 const timeline = () => SKIP_INTRO
   ? [...body, debrief]
-  : [consentPdf, consent, ...practice, ...body, debrief];
+  : [consentPdf, demographics, consent, ...practice, ...body, debrief];
 
 /* jatos.js is only present when the study is served by JATOS. Outside it
    (python server.py, file://, GitHub Pages) IN_JATOS is false and the old
