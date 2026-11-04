@@ -319,7 +319,7 @@ body{
 #jspsych-target{max-width:860px; margin:0 auto; padding:40px 24px 80px;}
 #study-progress{max-width:860px; margin:20px auto 0; padding:0 24px;}
 .study-progress-track{width:100%; height:14px; background:#e9e6df; border-radius:999px; overflow:hidden; border:1px solid var(--line);}
-.study-progress-fill{width:0%; height:100%; background:linear-gradient(90deg, var(--A), var(--C)); transition:width .25s ease;}
+.study-progress-fill{width:0%; height:100%; background:#000; transition:width .25s ease;}
 .study-progress-label{margin-top:8px; text-align:right; color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em;}
 .consent-pdf-page{padding-top:18px}
 .consent-pdf-shell{display:flex; align-items:center; justify-content:center; gap:18px; margin:18px 0 12px}
@@ -393,7 +393,6 @@ p{margin:0 0 14px}
 .bagrow.done .tile{width:30px; height:30px; font-size:0; border-radius:7px}
 .tile-A{background:var(--A)} .tile-B{background:var(--B)}
 .tile-C{background:var(--C)} .tile-D{background:var(--D)}
-.choice-swatch{display:inline-block; vertical-align:middle; width:18px; height:18px; margin-right:6px; border-radius:5px; box-shadow:0 1px 2px rgba(0,0,0,.12)}
 /* still in the bag: face down, letter hidden */
 .tile-slot{background:#e9e6df; border:1px solid #d9d5cc; color:#b4afa5;
   box-shadow:inset 0 1px 3px rgba(0,0,0,.07)}
@@ -408,8 +407,9 @@ p{margin:0 0 14px}
 .tag{display:inline-block; margin-bottom:10px; padding:2px 11px; border-radius:20px;
   background:#e8e4db; color:var(--muted); font-size:11px; font-weight:700;
   letter-spacing:.14em; text-transform:uppercase}
-.chose{font-size:16px; color:var(--muted)}
-.chose b{color:var(--ink); font-weight:600}
+.verdict{display:inline-block; font-size:30px; font-weight:700; line-height:1}
+.verdict.right{color:#2c8a3e}
+.verdict.wrong{color:#c8302b}
 
 /* --- buttons --- */
 #jspsych-html-button-response-btngroup{display:flex; gap:12px;
@@ -906,7 +906,7 @@ const CONFIG = {
   // After a wrong guess the pressed button shakes and goes gray for this
   // long (ms) before the trial moves on. 0 = no hold.
   WRONG_DELAY_MS: 1000,
-  SHOW_CHOICE_ECHO: true,    // echo "You chose X" under the bags after each draw
+  SHOW_CHOICE_ECHO: true,    // show a green check / red x under the bags after each draw
   // false = the letter buttons must be clicked; the A/B/C/D keys do
   // nothing. (The spacebar shortcut on Next/Begin/Continue screens is
   // separate and always on.)
@@ -1091,6 +1091,13 @@ function slot(isNext) {
          (isNext ? '?' : '') + '</span>';
 }
 
+/* The green check / red x shown under the bags. */
+function verdictHtml(correct) {
+  return correct
+    ? '<span class="verdict right" role="img" aria-label="Correct">&#10003;</span>'
+    : '<span class="verdict wrong" role="img" aria-label="Wrong">&#10007;</span>';
+}
+
 function bagRow(index, items, opts) {
   opts = opts || {};
   const tiles = items.map((l, i) =>
@@ -1204,13 +1211,15 @@ function patternTimeline(pattern, patternIndex, nPatterns, opts) {
   const history = [];   // bags already emptied, in order
 
   /* The draw and the next prediction share one screen, so nothing is
-     timed: the item that just came out is on screen, labelled with what
-     the participant guessed, while the next guess is being made. */
+     timed: the item that just came out is on screen, marked with a green
+     check or a red x for the participant's last guess, while the next
+     guess is being made. */
   let lastChoice = null;
+  let lastCorrect = false;
   let penaltyMs = 0;         // how long the current trial's wrong answer was held
   const echo = () =>
     (CONFIG.SHOW_CHOICE_ECHO && lastChoice)
-      ? '<span class="chose">You chose <span class="choice-swatch tile-' + lastChoice + '"></span> <b>' + escapeHtml(colorName(lastChoice)) + '</b></span>'
+      ? verdictHtml(lastCorrect)
       : '';
 
   bags.forEach((bag, bagIndex) => {
@@ -1245,8 +1254,12 @@ function patternTimeline(pattern, patternIndex, nPatterns, opts) {
           on_load: () => {
             keyHandler = attachKeyboard(choices);
             penaltyMs = 0;
-            holdWrongAnswer(i => choices[i] !== actual, CONFIG.WRONG_DELAY_MS,
-                            ms => { penaltyMs = ms; });
+            holdWrongAnswer(i => choices[i] !== actual, CONFIG.WRONG_DELAY_MS, ms => {
+              penaltyMs = ms;
+              // the x appears the moment the wrong button is pressed
+              const cap = document.querySelector(".caption");
+              if (CONFIG.SHOW_CHOICE_ECHO && cap) cap.innerHTML = verdictHtml(false);
+            });
           },
           on_finish: data => {
             if (keyHandler) document.removeEventListener("keydown", keyHandler);
@@ -1255,6 +1268,7 @@ function patternTimeline(pattern, patternIndex, nPatterns, opts) {
             data.penalty_ms = penaltyMs;   // wrong-answer hold, taken out of rt
             if (penaltyMs && data.rt != null) data.rt -= penaltyMs;
             lastChoice = data.predicted;
+            lastCorrect = data.correct;
           },
           data: {
             screen: "prediction",
@@ -1565,10 +1579,10 @@ const consent = continueTrial(
   () =>
     '<div class="screen text">' +
       '<h1>Prediction Task</h1>' +
-      '<p>Thank you for participating in our study! In this task, you will see multiple sequences of tiles. Your job is to predict the color of the next tile.</p>'+
-    '<p>After making your guess, the next tile will be revealed. You will do this for each tile in the sequence.</p>' +
-     '<p> There are four sequences in each set, and a total of 8-9 sets of sets. </p>' +
-     "<p> Let's start with a practice trial on one set. Make sure you can see all the colors clearly. </p>"+
+      '<p>Thank you for participating in our study! In this task, you will see multiple sequences of tiles. Your job is to predict the color of the next tile by looking at the tiles that came before it.</p>'+
+    '<p>After each guess, the next tile will be revealed until every tile in the sequence is uncovered.</p>' +
+     '<p>There are four sequences in each set, and a total of 8-9 sets of sets. </p>' +
+     "<p>Let's start with a practice trial on one set. Make sure you can see all the colors clearly. </p>"+
     '</div>',
   { screen: "consent" }, "Next");
 
