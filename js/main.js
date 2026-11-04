@@ -148,7 +148,7 @@ const consent = continueTrial(
   () =>
     '<div class="screen text">' +
       '<h1>Prediction Task</h1>' +
-      '<p>Thank you for participating in our study! In this task, you will see multiple sequences of tiles. Your job is to predict the color of the next tile.</p>'+
+      '<p>In this task, you will see multiple sequences of tiles. Your job is to predict the color of the next tile.</p>'+
     '<p>After making your guess, the next tile will be revealed. You will do this for each tile in the sequence.</p>' +
      '<p> There are four sequences in each set, and a total of 8-9 sets of sets. </p>' +
      "<p> Let's start with a practice trial on one set. Make sure you can see all the colors clearly. </p>"+
@@ -162,7 +162,7 @@ const consent = continueTrial(
 const demographics = {
   type: jsPsychSurveyHtmlForm,
   preamble: '<div class="demo-intro"><h1>About you</h1>' +
-    '<p>Before we begin, three quick questions.</p></div>',
+    '<p>Thank you for participating in our study! Before we begin, three quick questions.</p></div>',
   html:
     '<div class="demo-form">' +
       '<label for="demo-age">Age</label>' +
