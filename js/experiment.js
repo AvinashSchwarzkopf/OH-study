@@ -138,6 +138,13 @@ function slot(isNext) {
          (isNext ? '?' : '') + '</span>';
 }
 
+/* The green check / red x shown under the bags. */
+function verdictHtml(correct) {
+  return correct
+    ? '<span class="verdict right" role="img" aria-label="Correct">&#10003;</span>'
+    : '<span class="verdict wrong" role="img" aria-label="Wrong">&#10007;</span>';
+}
+
 function bagRow(index, items, opts) {
   opts = opts || {};
   const tiles = items.map((l, i) =>
@@ -251,13 +258,15 @@ function patternTimeline(pattern, patternIndex, nPatterns, opts) {
   const history = [];   // bags already emptied, in order
 
   /* The draw and the next prediction share one screen, so nothing is
-     timed: the item that just came out is on screen, labelled with what
-     the participant guessed, while the next guess is being made. */
+     timed: the item that just came out is on screen, marked with a green
+     check or a red x for the participant's last guess, while the next
+     guess is being made. */
   let lastChoice = null;
+  let lastCorrect = false;
   let penaltyMs = 0;         // how long the current trial's wrong answer was held
   const echo = () =>
     (CONFIG.SHOW_CHOICE_ECHO && lastChoice)
-      ? '<span class="chose">You chose <span class="choice-swatch tile-' + lastChoice + '"></span> <b>' + escapeHtml(colorName(lastChoice)) + '</b></span>'
+      ? verdictHtml(lastCorrect)
       : '';
 
   bags.forEach((bag, bagIndex) => {
@@ -292,8 +301,12 @@ function patternTimeline(pattern, patternIndex, nPatterns, opts) {
           on_load: () => {
             keyHandler = attachKeyboard(choices);
             penaltyMs = 0;
-            holdWrongAnswer(i => choices[i] !== actual, CONFIG.WRONG_DELAY_MS,
-                            ms => { penaltyMs = ms; });
+            holdWrongAnswer(i => choices[i] !== actual, CONFIG.WRONG_DELAY_MS, ms => {
+              penaltyMs = ms;
+              // the x appears the moment the wrong button is pressed
+              const cap = document.querySelector(".caption");
+              if (CONFIG.SHOW_CHOICE_ECHO && cap) cap.innerHTML = verdictHtml(false);
+            });
           },
           on_finish: data => {
             if (keyHandler) document.removeEventListener("keydown", keyHandler);
@@ -302,6 +315,7 @@ function patternTimeline(pattern, patternIndex, nPatterns, opts) {
             data.penalty_ms = penaltyMs;   // wrong-answer hold, taken out of rt
             if (penaltyMs && data.rt != null) data.rt -= penaltyMs;
             lastChoice = data.predicted;
+            lastCorrect = data.correct;
           },
           data: {
             screen: "prediction",
